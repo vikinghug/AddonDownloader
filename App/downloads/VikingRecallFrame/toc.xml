@@ -1,0 +1,5 @@
+<Addon APIVersion="8" Name="VikingRecallFrame" Author="VikingHug-Iglo" Version="1" Description="Replace the default recall button">
+    <Script Name="VikingRecallFrame.lua"/>
+    <Form Name="VikingRecallFrame.xml"/>
+    <ReplaceAddon Name="RecallFrame"/>
+</Addon>

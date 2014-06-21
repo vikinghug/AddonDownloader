@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="./generated/css/main.css">
+  </head>
+  <body>
+    <header>
+      <h1>VikinghugUI Downloader</h1>
+      <div class="toolbar">
+        <button id="download-all">Download All</button>
+      </div>
+    </header>
+    <ul id="repos" class="modules"></ul>
+    <script id="repo-template" type="text/x-handlebars-template">
+      <li class="module" data-repo-id="{{id}}">
+        <span>{{name}}</span>
+        {{!-- <span>{{git_url}}</span> --}}
+        <span class="right">
+        {{branches.length}}
+        {{!-- {{#branches}}
+          {{{this.name}}}
+        {{/branches}} --}}
+        </span>
+      </li>
+    </script>
+
+    <script>
+      gh = require('./generated/js/index');
+    </script>
+
+  </body>
+</html>

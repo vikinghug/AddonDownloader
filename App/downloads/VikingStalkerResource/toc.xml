@@ -1,0 +1,5 @@
+<Addon Name="VikingStalkerResource" Version="" Author="VikinghugUI" APIVersion="8" Description="">
+    <Script Name="VikingStalkerResource.lua"/>
+    <Form Name="VikingStalkerResource.xml"/>
+    <ReplaceAddon Name="StalkerResource"/>
+</Addon>

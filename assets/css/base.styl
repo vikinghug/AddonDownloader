@@ -1,0 +1,183 @@
++selection() {
+  color: #fff;
+  background-color: rgba(60, 184, 120, 0.99);
+}
+
+
+html, body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background-color: black;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.main {}
+
+h1, h2, h3, h4, h5 {
+  margin: 0;
+  padding: .75em 0 .75em;
+}
+
+a {
+  transition: color .3s ease;
+  color: light-grey;
+  text-decoration: none;
+  &:hover {
+    color: green;
+  }
+}
+
+
+//
+// HEADER
+// ******************************************************************
+
+header {
+  background-color: purple;
+  width: 100%;
+  text-align: center;
+  position: fixed;
+  top: 0;
+
+  h1 {
+    color: yellow;
+    font-size: 1.4em;
+    font-weight: 200;
+  }
+
+  h2 {
+    font-size: 3em;
+    font-style: italic;
+  }
+
+  .toolbar {
+    position: absolute;
+    top: 8px;
+    right: 15px;
+  }
+}
+
+
+screen-color(color) {
+  h3 { color: color; }
+  .screen > span {
+    box-shadow: 0 0 0 1px color;
+    color: color;
+  }
+}
+
+screen-background-color(color) {
+  background-color: color;
+  &:before {
+    background-color: color;
+  }
+}
+
+list-item(icon, color) {
+  // @extend .fa;
+  line-height: 1.6;
+  display: block;
+  color: color;
+  &:before {
+    margin-right: 6px;
+    font-size: .8em;
+    line-height: 1.25;
+    content: icon;
+  }
+}
+
+//
+// MODULES
+// ******************************************************************
+.modules {
+  @extend ul.no-bullet;
+  margin-top: 60px;
+}
+.module {
+  box-shadow: 0 1px purple;
+  // height: 24px;
+  padding: 15px;
+
+}
+
+
+
+//
+// CONTRIBUTORS
+// ******************************************************************
+section.contributors {
+  .panel {
+    height: 200px;
+    margin-bottom: 20px;
+  }
+  h3 {
+    color: red;
+    font-size: 2em;
+    font-weight: 100;
+    margin: 0;
+    padding: 0;
+  }
+  h4 {
+    color: light-purple;
+    border-bottom: 1px solid purple;
+    margin-bottom: 10px;
+  }
+  li {
+    margin-bottom: .5em;
+  }
+}
+
+
+//
+// FOOTER
+// ******************************************************************
+
+footer {
+  background: purple;
+  text-align: center;
+  padding: 20px;
+}
+
+section {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.fa:before {
+  transition: color .3s ease;
+  color: rgba(light-purple, 1);
+  font-size: 16px;
+  margin-right: 6px;
+  line-height: 1.25;
+}
+
+
+//
+// Buttons
+// ******************************************************************
+
+.button,
+button {
+  transition: all .3s ease;
+  background: transparent;
+  border: none;
+  box-shadow: 0 0 0 1px yellow;
+  color: yellow;
+  font-size: 1em;
+  font-weight: 100;
+  padding: 10px 15px;
+  &:hover {
+    background: yellow;
+    color: purple;
+  }
+}
+
+.right {
+  float: right;
+}

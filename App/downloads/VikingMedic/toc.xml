@@ -1,0 +1,5 @@
+<Addon Name="VikingMedic" APIVersion="8" Author="VikinghugUI" Version="" Description="">
+    <Script Name="VikingMedic.lua"/>
+    <Form Name="VikingMedic.xml"/>
+    <ReplaceAddon Name="Medic"/>
+</Addon>

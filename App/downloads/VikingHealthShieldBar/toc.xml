@@ -1,0 +1,5 @@
+<Addon Name="VikingHealthShieldBar" Version="1" Author="VikingHug-Iglo" APIVersion="8" Description="Replacement for the HealthShieldBar">
+    <Script Name="VikingHealthShieldBar.lua"/>
+    <Form Name="VikingHealthShieldBar.xml"/>
+    <ReplaceAddon Name="HealthShieldBar"/>
+</Addon>

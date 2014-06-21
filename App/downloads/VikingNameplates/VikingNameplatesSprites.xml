@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Sprites>
+    <Sprite Name="Gradient128" Cycle="1">
+        <Frame Texture="VikingNameplates\assets\gradient128.tga" x0="0" x1="256" x2="256" x3="256" x4="256" x5="256" y0="0" y1="128" y2="128" y3="128" y4="128" y5="128" Stretchy="1" HotspotX="0" HotspotY="0" Duration="1.000" StartColor="white" EndColor="white"/>
+    </Sprite>
+</Sprites>

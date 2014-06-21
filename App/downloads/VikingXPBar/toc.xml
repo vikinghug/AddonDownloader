@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="VikingHug-Iglo" APIVersion="8" Name="VikingXPBar" Description="Replaces Xp bar and under textures" Version="1">
+    <Script Name="VikingXPBar.lua"/>
+    <Form Name="VikingXPBar.xml"/>
+    <ReplaceAddon Name="XPBar"/>
+</Addon>

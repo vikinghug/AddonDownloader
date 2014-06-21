@@ -1,0 +1,5 @@
+<Addon Name="VikingWarriorResource" Version="0.1" Author="VikinghugUI" APIVersion="8" Description="Replaces WarriorRescources">
+    <Script Name="VikingWarriorResource.lua"/>
+    <Form Name="VikingWarriorResource.xml"/>
+    <ReplaceAddon Name="WarriorResource"/>
+</Addon>

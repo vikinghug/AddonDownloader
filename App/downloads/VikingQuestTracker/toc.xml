@@ -1,0 +1,5 @@
+<Addon Name="VikingQuestTracker" Version="0.1" Author="VikinghugUI" APIVersion="8" Description="Replaces the QuestTracker">
+    <Script Name="VikingQuestTracker.lua"/>
+    <Form Name="VikingQuestTracker.xml"/>
+    <ReplaceAddon Name="QuestTracker"/>
+</Addon>
