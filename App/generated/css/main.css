@@ -431,6 +431,7 @@ body {
   margin: 0;
 }
 body {
+  -webkit-app-region: drag;
   background-color: #201e2d;
   font-size: 16px;
   line-height: 1.2;
