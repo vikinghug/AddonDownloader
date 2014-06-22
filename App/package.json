@@ -6,8 +6,8 @@
     "title": "node-webkit demo",
     "toolbar": true,
     "frame": true,
-    "width": 300,
-    "height": 220,
+    "width": 450,
+    "height": 800,
     "position": "mouse",
     "resizable": true
   },
@@ -18,6 +18,8 @@
     "handlebars": "^2.0.0",
     "jquery": "^2.1.1",
     "mustache": "^0.8.2",
+    "nconf": "^0.6.9",
+    "nedb": "^0.10.5",
     "octonode": "^0.6.3",
     "watchjs": "0.0.0",
     "zepto": "0.0.4"

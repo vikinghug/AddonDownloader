@@ -352,10 +352,64 @@ pre code span.bash:before {
   margin-right: 10px;
 }
 ul.no-bullet,
-.modules {
+.modules,
+.module .branches ul {
   list-style-type: none;
   padding: 0px;
   margin: 0px;
+}
+@font-face {
+  font-family: 'VikinghugUI';
+  src: url("../fonts/VikinghugUI.eot");
+  src: url("../fonts/VikinghugUI.eot?#iefix") format("embedded-opentype"), url("../fonts/VikinghugUI.ttf") format("truetype"), url("../fonts/VikinghugUI.woff") format("woff"), url("../fonts/VikinghugUI.svg#VikinghugUI") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+[class*="icon-"]:before,
+#download-all:before,
+.module .branches button.dropdown:before,
+.module .branches button.dropdown:after,
+.module .download:before {
+  display: inline-block;
+  font-family: 'VikinghugUI';
+  speak: none;
+  font-variant: normal;
+  font-style: normal;
+  font-weight: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+[class*="icon-"]:before:active {
+  text-decoration: none;
+}
+.icon-skull:before {
+  content: "\e02f";
+}
+.icon-download:before {
+  content: "\e228";
+}
+.icon-wrench:before {
+  content: "\e318";
+}
+.icon-bug:before {
+  content: "\e3cb";
+}
+.icon-branch:before {
+  content: "\e480";
+}
+.icon-branch-alt:before {
+  content: "\e489";
+}
+.icon-diamond:before {
+  content: "\e49c";
+}
+.icon-download-alt:before {
+  content: "\e665";
+}
+.icon-down:before {
+  content: "\e62a";
 }
 ::selection {
   color: #fff;
@@ -396,9 +450,9 @@ a:hover {
   color: #3cb878;
 }
 header {
-  background-color: #28253a;
+  background-color: rgba(40,37,58,0.85);
   width: 100%;
-  text-align: center;
+  text-align: left;
   position: fixed;
   top: 0;
 }
@@ -406,6 +460,7 @@ header h1 {
   color: #ffd161;
   font-size: 1.4em;
   font-weight: 200;
+  padding-left: 15px;
 }
 header h2 {
   font-size: 3em;
@@ -416,12 +471,133 @@ header .toolbar {
   top: 8px;
   right: 15px;
 }
+#download-all {
+  background-color: #3cb878;
+  box-shadow: 0 0 0 1px #3cb878;
+  color: #28253a;
+}
+#download-all:before {
+  content: "\e228";
+  color: inherit;
+  margin: 0 0.5em 0 0;
+  padding: 0;
+}
+#download-all:hover {
+  background-color: #28253a;
+  color: #3cb878;
+}
 .modules {
   margin-top: 60px;
 }
 .module {
   box-shadow: 0 1px #28253a;
   padding: 15px;
+}
+.module .branches {
+  display: inline-block;
+  position: relative;
+}
+.module .branches:hover button.dropdown {
+  background: #bcb7da;
+  color: #28253a;
+}
+.module .branches:hover ul {
+  color: #645f7e;
+  display: block;
+}
+.module .branches button.dropdown {
+  box-shadow: 0 0 0 1px rgba(100,95,126,0.8);
+  font-size: 0.8em;
+  height: 22px;
+  margin-right: 10px;
+  line-height: 1em;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+.module .branches button.dropdown:before {
+  content: "\e480";
+  color: inherit;
+  margin: 0 0.5em 0 0;
+  padding: 0;
+}
+.module .branches button.dropdown:after {
+  content: "\e62a";
+  color: inherit;
+  margin: 0 0 0 0.5em;
+  padding: 0;
+}
+.module .branches ul {
+  background: #28253a;
+  position: absolute;
+  display: none;
+  text-align: left;
+  top: 22px;
+}
+.module .branches ul li {
+  box-shadow: 0 1px #201e2d;
+  padding: 15px;
+  white-space: nowrap;
+  text-align: left;
+  position: relative;
+}
+.module .branches .menu {
+  position: absolute;
+  z-index: 2;
+}
+.module .branches .menu a {
+  padding-right: 60px;
+}
+.module .branches .menu .download {
+  font-size: 1.2em;
+  padding-right: 0;
+  margin-right: 0px;
+  position: absolute;
+  right: 15px;
+}
+.module .branches .menu .download:after {
+  color: #bcb7da;
+  margin: 0;
+}
+.module button,
+.module .button {
+  font-size: 0.6em;
+  line-height: 1em;
+  padding: 0 10px;
+  height: 24px;
+}
+.module .download {
+  background: rgba(100,95,126,0.35);
+  box-shadow: 0 0 0 1px #28253a;
+  line-height: 1em;
+}
+.module .download:before {
+  content: "\e228";
+  color: inherit;
+  margin: 0 0.5em 0 0;
+  padding: 0;
+}
+.module .download span {
+  display: none;
+}
+.module .download:hover {
+  background: #201e2d;
+  box-shadow: 0 0 0 1px #3cb878;
+  color: #3cb878;
+}
+.module .updates {
+  border-radius: 1000px;
+  box-shadow: 0 0 0 1px #3cb878;
+  color: #3cb878;
+  display: inline-block;
+  display: none;
+  font-size: 0.8em;
+  line-height: 1em;
+  text-align: center;
+  margin-right: 10px;
+  padding: 5px 6px;
+  width: 22px;
+  height: 22px;
 }
 section.contributors .panel {
   height: 200px;
@@ -467,17 +643,80 @@ button {
   transition: all 0.3s ease;
   background: transparent;
   border: none;
-  box-shadow: 0 0 0 1px #ffd161;
-  color: #ffd161;
+  border-radius: 1000px;
+  box-shadow: 0 0 0 1px #bcb7da;
+  color: #bcb7da;
+  cursor: pointer;
   font-size: 1em;
   font-weight: 100;
   padding: 10px 15px;
 }
 .button:hover,
 button:hover {
-  background: #ffd161;
+  background: #bcb7da;
   color: #28253a;
+}
+body.message {
+  overflow: hidden;
+  pointer-events: none;
+}
+body.message #message {
+  pointer-events: auto;
+  opacity: 1;
+}
+#message {
+  -webkit-transition: opacity 0.6s ease;
+  -moz-transition: opacity 0.6s ease;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  position: fixed;
+  opacity: 0;
+  top: 60px;
+  left: 15px;
+  right: 15px;
+  color: #201e2d;
+  min-height: 140px;
+  z-index: 10;
+}
+#message p {
+  color: #201e2d;
+  padding: 15px;
+  position: relative;
+  z-index: 2;
+}
+#message:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  background: #ffd161;
+}
+#message:after {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(40,37,58,0.86);
+  z-index: 0;
+}
+#message .close {
+  border-radius: 1000px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #e05757;
+  padding: 10px 5px;
+  color: #ffd161;
+  box-shadow: 0 0 0 1px #e05757;
+  z-index: 6;
+  cursor: pointer;
 }
 .right {
   float: right;
+  border-radius: 1000px;
 }

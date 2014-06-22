@@ -12,20 +12,41 @@
       </div>
     </header>
     <ul id="repos" class="modules"></ul>
-    <script id="repo-template" type="text/x-handlebars-template">
-      <li class="module" data-repo-id="{{id}}">
-        <span>{{name}}</span>
-        {{!-- <span>{{git_url}}</span> --}}
-        <span class="right">
-        {{branches.length}}
-        {{!-- {{#branches}}
-          {{{this.name}}}
-        {{/branches}} --}}
-        </span>
-      </li>
-    </script>
+      <script id="repo-template" type="text/x-handlebars-template">
+        <li class="module" data-repo-id="{{id}}" data-repo-url="{{ssh_url}}" data-repo-name="{{name}}">
+          <div class="branches">
+            <button class="dropdown">{{branches.length}}</button>
+
+            <ul class="menu">
+              {{#branches}}
+                <li>
+                  <a href="{{this.html_url}}" target="_blank">{{this.name}}</a>
+                  <button class="download" data-url="{{this.download_url}}"><span>Download</span></button>
+                </li>
+              {{/branches}}
+            </ul>
+
+          </div>
+
+
+          <span>{{name}}</span>
+
+          <span class="right">
+            <span class="updates"></span>
+            <button class="download">Download</button>
+          </span>
+
+        </li>
+      </script>
+    </ul>
+
+    <div id="message">
+      <p></p>
+      <div class="close"><span>close</span></div>
+    </div>
 
     <script>
+      window.dataPath = require('nw.gui').App.dataPath;
       gh = require('./generated/js/index');
     </script>
 
