@@ -1,4 +1,0 @@
-VikingSprintMeter
-=================
-
-Wildstar SprintMeter reskin

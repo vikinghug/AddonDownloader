@@ -16,6 +16,7 @@ class App
 
   createEvents: ->
     gh.on "UPDATE", (data) => @updateView(data)
+    gh.on "MODULE:DONE", (name) => @setModuleDone(name)
     gh.on "MESSAGE:ADD", (data) => @flashMessage(data)
     gh.on "MESSAGE:CLOSE", => @removeMessage()
 
@@ -45,6 +46,27 @@ class App
       $("#repos").append(html)
     else
       $el.replaceWith(html)
+
+    @sortModules()
+
+
+  sortModules: ->
+      $modulesContainer = $("#repos")
+      $modules = $modulesContainer.children('.module')
+
+      $modules.sort (a,b) ->
+        aStr = a.getAttribute("data-repo-name").toLowerCase()
+        bStr = b.getAttribute("data-repo-name").toLowerCase()
+        if (aStr > bStr)
+          return 1
+        else if (bStr > aStr)
+          return -1
+        else
+          return 0
+
+      $modules.detach().appendTo($modulesContainer)
+
+  setModuleDone: (name) -> $("[data-repo-name=#{name}]").addClass("done")
 
   flashMessage: (msg) ->
     console.log msg

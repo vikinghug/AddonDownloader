@@ -1,1 +1,0 @@
-# VikingMedic\n

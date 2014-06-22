@@ -1,4 +1,4 @@
-var $, Data, EventEmitter, Github, WatchJS, addonsFolder, callWatchers, client, exec, fs, ghdownload, github, path, unwatch, watch,
+var $, Data, EventEmitter, Github, WatchJS, addonsFolder, appData, callWatchers, client, exec, fs, ghdownload, github, path, unwatch, watch,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -26,14 +26,16 @@ EventEmitter = require('events').EventEmitter;
 
 Data = require('./data');
 
-addonsFolder = process.env.LOCALAPPDATA;
+appData = process.env.APPDATA != null ? process.env.APPDATA : "./downloads";
+
+addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons");
 
 client = github.client("b88ebd287229cba593058175b38b059b13af6034");
 
 Github = (function(_super) {
   __extends(Github, _super);
 
-  Github.prototype.blacklist = ["vikinghug.com", "VikingBuddies"];
+  Github.prototype.blacklist = ["AddonDownloader", "vikinghug.com", "VikingBuddies"];
 
   Github.prototype.repos = [];
 
@@ -60,31 +62,30 @@ Github = (function(_super) {
 
   Github.prototype.downloadRepo = function(name, url) {
     var dest, self;
-    dest = "./downloads/" + name;
+    dest = path.join(addonsFolder, name);
     self = this;
     return fs.exists(dest, (function(_this) {
       return function(bool) {
+        var err;
         if (bool) {
           fs.rmrfSync(dest);
         }
-        return ghdownload(url, dest).on('dir', function(dir) {
-          return console.log(dir);
-        }).on('file', function(file) {
-          return console.log(file);
-        }).on('zip', function(zipUrl) {
-          return console.log(zipUrl);
-        }).on('error', function(err) {
-          return console.error(err);
-        }).on('end', function() {
-          var addonDir, err;
-          try {
-            addonDir = path.join(__dirname, "App", "downloads", name);
-            return fs.move(addonDir, addonsFolder);
-          } catch (_error) {
-            err = _error;
-            return self.emit("MESSAGE:ADD", err.message);
-          }
-        });
+        try {
+          return ghdownload(url, dest).on('dir', function(dir) {
+            return console.log(dir);
+          }).on('file', function(file) {
+            return console.log(file);
+          }).on('zip', function(zipUrl) {
+            return console.log(zipUrl);
+          }).on('error', function(err) {
+            return console.error(err);
+          }).on('end', function() {
+            return self.emit("MODULE:DONE", name);
+          });
+        } catch (_error) {
+          err = _error;
+          return self.emit("MESSAGE:ADD", err.message);
+        }
       };
     })(this));
   };
@@ -156,11 +157,9 @@ Github = (function(_super) {
             branch.download_url = "" + this.git_url + "\#" + branch.name;
           }
       }
-      Data.set(payload);
       return self.emit("UPDATE", this);
     });
-    this.emit("UPDATE", payload);
-    return Data.set(this.repos);
+    return this.emit("UPDATE", payload);
   };
 
   Github.prototype.filterForBlacklist = function(array) {

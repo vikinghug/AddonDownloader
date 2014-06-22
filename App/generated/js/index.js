@@ -26,6 +26,11 @@ App = (function() {
         return _this.updateView(data);
       };
     })(this));
+    gh.on("MODULE:DONE", (function(_this) {
+      return function(name) {
+        return _this.setModuleDone(name);
+      };
+    })(this));
     gh.on("MESSAGE:ADD", (function(_this) {
       return function(data) {
         return _this.flashMessage(data);
@@ -74,10 +79,34 @@ App = (function() {
     html = template(data);
     $el = $("[data-repo-id=" + data.id + "]");
     if ($el.length === 0) {
-      return $("#repos").append(html);
+      $("#repos").append(html);
     } else {
-      return $el.replaceWith(html);
+      $el.replaceWith(html);
     }
+    return this.sortModules();
+  };
+
+  App.prototype.sortModules = function() {
+    var $modules, $modulesContainer;
+    $modulesContainer = $("#repos");
+    $modules = $modulesContainer.children('.module');
+    $modules.sort(function(a, b) {
+      var aStr, bStr;
+      aStr = a.getAttribute("data-repo-name").toLowerCase();
+      bStr = b.getAttribute("data-repo-name").toLowerCase();
+      if (aStr > bStr) {
+        return 1;
+      } else if (bStr > aStr) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+    return $modules.detach().appendTo($modulesContainer);
+  };
+
+  App.prototype.setModuleDone = function(name) {
+    return $("[data-repo-name=" + name + "]").addClass("done");
   };
 
   App.prototype.flashMessage = function(msg) {

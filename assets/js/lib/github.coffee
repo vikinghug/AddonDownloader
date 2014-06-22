@@ -10,7 +10,8 @@ unwatch      = WatchJS.unwatch
 callWatchers = WatchJS.callWatchers
 EventEmitter = require('events').EventEmitter
 Data         = require('./data')
-addonsFolder = process.env.LOCALAPPDATA
+appData = if process.env.APPDATA? then process.env.APPDATA else "./downloads"
+addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons")
 
 # this is a generic token
 client = github.client("b88ebd287229cba593058175b38b059b13af6034")
@@ -18,6 +19,7 @@ client = github.client("b88ebd287229cba593058175b38b059b13af6034")
 class Github extends EventEmitter
 
   blacklist: [
+    "AddonDownloader"
     "vikinghug.com"
     "VikingBuddies"
   ]
@@ -26,8 +28,7 @@ class Github extends EventEmitter
 
   constructor: -> return
 
-  setRepos: (repos) ->
-    @repos = repos
+  setRepos: (repos) -> @repos = repos
 
   downloadRepos: ->
     for repo, i in @repos
@@ -36,22 +37,20 @@ class Github extends EventEmitter
       @downloadRepo(name, url)
 
   downloadRepo: (name, url) ->
-    dest = "./downloads/#{name}"
+    dest = path.join(addonsFolder, name)
+
     self = @
     fs.exists dest, (bool) =>
       if bool then fs.rmrfSync dest
-
-      ghdownload(url, dest)
-      .on 'dir', (dir) -> console.log(dir)
-      .on 'file', (file) -> console.log(file)
-      .on 'zip', (zipUrl) -> console.log(zipUrl)
-      .on 'error', (err) -> console.error(err)
-      .on 'end', =>
-        try
-          addonDir = path.join(__dirname, "App", "downloads", name)
-          fs.move addonDir, addonsFolder
-        catch err
-          self.emit("MESSAGE:ADD", err.message)
+      try
+        ghdownload(url, dest)
+        .on 'dir', (dir) -> console.log(dir)
+        .on 'file', (file) -> console.log(file)
+        .on 'zip', (zipUrl) -> console.log(zipUrl)
+        .on 'error', (err) -> console.error(err)
+        .on 'end', => self.emit("MODULE:DONE", name)
+      catch err
+        self.emit("MESSAGE:ADD", err.message)
 
 
   findRepo: (id) ->
@@ -59,6 +58,7 @@ class Github extends EventEmitter
 
     for repo, i in @repos
       if repo.id == id then return i else return null
+
 
   getRepos: (owner) ->
     org = client.org(owner)
@@ -70,6 +70,7 @@ class Github extends EventEmitter
 
       for repo, i in array
         @initRepo(repo, i)
+
 
   initRepo: (repo, i) ->
     payload =
@@ -87,8 +88,6 @@ class Github extends EventEmitter
     else
       @repos.push(payload)
 
-
-    # @runCommand("releases", payload)
     @runCommand("branches", payload)
     @runCommand("info", payload)
 
@@ -99,10 +98,10 @@ class Github extends EventEmitter
           for branch, i in data
             branch.html_url = "#{this.html_url}/tree/#{branch.name}"
             branch.download_url = "#{this.git_url}\##{branch.name}"
-      Data.set(payload)
+
       self.emit("UPDATE", this)
     @emit("UPDATE", payload)
-    Data.set(@repos)
+
 
   filterForBlacklist: (array) ->
     self = this

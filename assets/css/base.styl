@@ -120,6 +120,15 @@ list-item(icon, color) {
   box-shadow: 0 1px purple;
   padding: 15px;
 
+  &.done {
+    .icon-diamond { color: green; }
+  }
+
+  .icon-diamond {
+    color: rgba(light-purple, .35);
+    margin-top: 4px;
+  }
+
   .branches {
     display: inline-block;
     position: relative;
