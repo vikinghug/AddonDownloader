@@ -26,7 +26,7 @@ EventEmitter = require('events').EventEmitter;
 
 Data = require('./data');
 
-appData = process.env.APPDATA != null ? process.env.APPDATA : "./downloads";
+appData = process.env.APPDATA != null ? process.env.APPDATA : path.join(process.env.HOME, ".downloads");
 
 addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons");
 

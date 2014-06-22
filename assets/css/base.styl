@@ -3,6 +3,10 @@
   background-color: rgba(60, 184, 120, 0.99);
 }
 
+* {
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
 
 html, body {
   width: 100%;
@@ -40,10 +44,12 @@ a {
 
 header {
   background-color: rgba(purple, .85);
+  cursor: default;
   width: 100%;
   text-align: left;
   position: fixed;
   top: 0;
+  z-index: 10;
 
   h1 {
     color: yellow;
@@ -97,7 +103,6 @@ screen-background-color(color) {
 }
 
 list-item(icon, color) {
-  // @extend .fa;
   line-height: 1.6;
   display: block;
   color: color;
@@ -301,6 +306,7 @@ button {
   font-size: 1em;
   font-weight: 100;
   padding: 10px 15px;
+  &:focuse { outline: 0; }
   &:hover {
     background: light-grey;
     color: purple;

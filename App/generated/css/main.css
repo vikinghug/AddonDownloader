@@ -419,6 +419,10 @@ ul.no-bullet,
   color: #fff;
   background-color: rgba(60,184,120,0.99);
 }
+* {
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
 html,
 body {
   width: 100%;
@@ -451,10 +455,12 @@ a:hover {
 }
 header {
   background-color: rgba(40,37,58,0.85);
+  cursor: default;
   width: 100%;
   text-align: left;
   position: fixed;
   top: 0;
+  z-index: 10;
 }
 header h1 {
   color: #ffd161;
@@ -657,6 +663,10 @@ button {
   font-size: 1em;
   font-weight: 100;
   padding: 10px 15px;
+}
+.button:focuse,
+button:focuse {
+  outline: 0;
 }
 .button:hover,
 button:hover {

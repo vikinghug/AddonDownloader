@@ -10,7 +10,7 @@ unwatch      = WatchJS.unwatch
 callWatchers = WatchJS.callWatchers
 EventEmitter = require('events').EventEmitter
 Data         = require('./data')
-appData = if process.env.APPDATA? then process.env.APPDATA else "./downloads"
+appData = if process.env.APPDATA? then process.env.APPDATA else path.join(process.env.HOME, ".downloads")
 addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons")
 
 # this is a generic token
