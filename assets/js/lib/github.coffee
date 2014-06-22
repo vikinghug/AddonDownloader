@@ -20,7 +20,9 @@ class Github extends EventEmitter
   blacklist: [
     "AddonDownloader"
     "vikinghug.com"
-    "VikingBuddies"
+    "VikingActionBarSet"
+    "VikingDocs"
+    "VikingQuestTrackerSet"
   ]
 
   addonsFolder    : path.join(appData, "NCSOFT", "WildStar", "addons")

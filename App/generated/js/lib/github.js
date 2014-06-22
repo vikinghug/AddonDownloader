@@ -34,7 +34,7 @@ client = github.client("b88ebd287229cba593058175b38b059b13af6034");
 Github = (function(_super) {
   __extends(Github, _super);
 
-  Github.prototype.blacklist = ["AddonDownloader", "vikinghug.com", "VikingBuddies"];
+  Github.prototype.blacklist = ["AddonDownloader", "vikinghug.com", "VikingActionBarSet", "VikingDocs", "VikingQuestTrackerSet"];
 
   Github.prototype.addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons");
 
