@@ -11,7 +11,6 @@ callWatchers = WatchJS.callWatchers
 EventEmitter = require('events').EventEmitter
 Data         = require('./data')
 appData = if process.env.APPDATA? then process.env.APPDATA else path.join(process.env.HOME, ".downloads")
-addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons")
 
 # this is a generic token
 client = github.client("b88ebd287229cba593058175b38b059b13af6034")
@@ -24,53 +23,105 @@ class Github extends EventEmitter
     "VikingBuddies"
   ]
 
-  repos: []
+  addonsFolder    : path.join(appData, "NCSOFT", "WildStar", "addons")
+  addonsFolderSet : false
 
-  constructor: -> return
+  repos           : []
+  queue           : []
+
+
+  constructor: ->
+    self = @
+    watch @, ["addonsFolderSet"], (key, command, data) ->
+      self.clearQueue() if data
+    return
 
   setRepos: (repos) -> @repos = repos
 
+  setAddonsFolder: (dest) ->
+    @addonsFolderSet = true
+    return @addonsFolder = dest
+
+  updateAddonsFolder: (dest) -> @emit("CONFIG:SET:ADDONSFOLDER", dest)
+
+  addToQueue: (fn, args...) ->
+    @queue.push([fn, args])
+
+  clearQueue: ->
+    try
+      for fn, i in @queue
+        fn[0].apply(this,fn[1])
+    catch err
+      self.emit("MESSAGE:ADD", err.message)
+
   downloadRepos: ->
-    for repo, i in @repos
-      url = repo.git_url
-      name = repo.name
-      @downloadRepo(name, url)
+    if not @addonsFolderSet
+      @updateAddonsFolder(@addonsFolder)
+      @addToQueue(@downloadRepos)
+    else
+      try
+        for repo, i in @repos
+          url = repo.git_url
+          name = repo.name
+          @downloadRepo(name, url)
+      catch
+        self.emit("MESSAGE:ADD", err.message)
 
   downloadRepo: (name, url) ->
-    dest = path.join(addonsFolder, name)
+    if not @addonsFolderSet
+      @updateAddonsFolder(@addonsFolder)
+      @addToQueue(@downloadRepo, name, url)
+    else
+      console.log "downloadRepo: ->"
+      console.log @addonsFolder, name
+      dest = path.join(@addonsFolder, name)
 
-    self = @
-    fs.exists dest, (bool) =>
-      if bool then fs.rmrfSync dest
-      try
-        ghdownload(url, dest)
-        .on 'dir', (dir) -> console.log(dir)
-        .on 'file', (file) -> console.log(file)
-        .on 'zip', (zipUrl) -> console.log(zipUrl)
-        .on 'error', (err) -> console.error(err)
-        .on 'end', => self.emit("MODULE:DONE", name)
-      catch err
-        self.emit("MESSAGE:ADD", err.message)
+      self = @
+      fs.exists dest, (bool) =>
+        if bool
+          try
+            fs.rmrfSync(dest)
+          catch err
+            self.emit("MESSAGE:ADD", err.message)
+            self.emit("MODULE:ERROR", name)
+        try
+          ghdownload(url, dest)
+          .on 'dir', (dir) -> console.log(dir)
+          .on 'file', (file) -> console.log(file)
+          .on 'zip', (zipUrl) -> console.log(zipUrl)
+          .on 'error', (err) -> console.error(err)
+          .on 'end', => self.emit("MODULE:DONE", name)
+        catch err
+          @sendError(err)
 
 
   findRepo: (id) ->
-    return null if @repos.length == 0
+    try
+      return null if @repos.length == 0
 
-    for repo, i in @repos
-      if repo.id == id then return i else return null
+      for repo, i in @repos
+        if repo.id == id then return i else return null
+    catch err
+      @sendError(err)
 
 
   getRepos: (owner) ->
     org = client.org(owner)
     org.repos (err, array, headers) =>
       if err
-        console.log err
+        @emit("MESSAGE:ADD", err.message)
         return
       array = @filterForBlacklist(array)
+      try
+        for repo, i in array
+          try
+            @initRepo(repo, i)
+          catch err
+            @sendError(err)
+      catch err
+        self.emit("MESSAGE:ADD", err.message)
 
-      for repo, i in array
-        @initRepo(repo, i)
-
+  sendError: (err) -> self.emit("MESSAGE:ADD", err.message)
 
   initRepo: (repo, i) ->
     payload =
@@ -95,12 +146,15 @@ class Github extends EventEmitter
     watch payload, (key, command, data) ->
       switch key
         when "branches"
-          for branch, i in data
-            branch.html_url = "#{this.html_url}/tree/#{branch.name}"
-            branch.download_url = "#{this.git_url}\##{branch.name}"
+          try
+            for branch, i in data
+              branch.html_url = "#{this.html_url}/tree/#{branch.name}"
+              branch.download_url = "#{this.git_url}\##{branch.name}"
+          catch err
+            self.emit("MESSAGE:ADD", err.message)
 
-      self.emit("UPDATE", this)
-    @emit("UPDATE", payload)
+      self.emit("MODULE:UPDATE", this)
+    @emit("MODULE:UPDATE", payload)
 
 
   filterForBlacklist: (array) ->

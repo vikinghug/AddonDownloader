@@ -4,13 +4,17 @@
     <title>VikinghugUI Downloader</title>
     <link rel="stylesheet" href="./generated/css/main.css">
   </head>
-  <body>
+  <body style="-webkit-app-region: drag">
     <header>
       <h1>VikinghugUI Downloader</h1>
       <div class="toolbar">
-        <button id="download-all">Download All</button>
+        <button id="config-button"><i class="icon-wrench"></i></button>
+        <div id="config-tooltip" class="tooltip">Set Addons Folder Directory</div>
       </div>
+      <input type="file" id="addons-folder-config" nwdirectory nwworkingdir="" />
     </header>
+
+
     <ul id="repos" class="modules"></ul>
       <script id="repo-template" type="text/x-handlebars-template">
         <li class="module" data-repo-id="{{id}}" data-repo-url="{{ssh_url}}" data-repo-name="{{name}}">
@@ -29,7 +33,8 @@
           </div>
 
 
-          <span>{{name}}</span>
+
+          <a href="{{this.html_url}}" target="_blank">{{name}}</a>
 
           <span class="right">
             <span class="updates"></span>
@@ -41,13 +46,17 @@
       </script>
     </ul>
 
+    <footer>
+      <button id="download-all">Download All</button>
+    </footer>
+
     <div id="message">
       <p></p>
       <div class="close"><span>close</span></div>
     </div>
 
     <script>
-      window.dataPath = require('nw.gui').App.dataPath;
+      window.gui = require('nw.gui');
       gh = require('./generated/js/index');
     </script>
 

@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "dependencies": {
     "nedb": "^0.10.5",
-    "octonode": "^0.6.3"
+    "octonode": "^0.6.3",
+    "nodewebkit": "^0.8.6-3"
+  },
+  "scripts": {
+    "start": "node ./node_modules/nodewebkit/bin/nodewebkit ./app/"
   },
   "devDependencies": {
     "coffee-script": "^1.7.1",

@@ -14,14 +14,33 @@ gh = require('./lib/github');
 Data = require('./lib/data');
 
 App = (function() {
+  App.prototype.configBtnEl = "#config-button";
+
+  App.prototype.fileDialogEl = "#addons-folder-config";
+
+  App.prototype.configTooltipEl = "#config-tooltip";
+
+  App.prototype.downloadAllBtnEl = "#download-all";
+
+  App.prototype.downloadBtnClassEl = ".download";
+
+  App.prototype.messageEl = "#message";
+
+  App.prototype.reposEl = "#repos";
+
+  App.prototype.repoTemplateEl = "#repo-template";
+
   function App() {
+    this.initView();
     this.createEvents();
     gh.getRepos("vikinghug");
   }
 
+  App.prototype.initView = function() {};
+
   App.prototype.createEvents = function() {
     var self;
-    gh.on("UPDATE", (function(_this) {
+    gh.on("MODULE:UPDATE", (function(_this) {
       return function(data) {
         return _this.updateView(data);
       };
@@ -29,6 +48,11 @@ App = (function() {
     gh.on("MODULE:DONE", (function(_this) {
       return function(name) {
         return _this.setModuleDone(name);
+      };
+    })(this));
+    gh.on("MODULE:ERROR", (function(_this) {
+      return function(name) {
+        return _this.setModuleError(name);
       };
     })(this));
     gh.on("MESSAGE:ADD", (function(_this) {
@@ -41,8 +65,13 @@ App = (function() {
         return _this.removeMessage();
       };
     })(this));
+    gh.on("CONFIG:SET:ADDONSFOLDER", (function(_this) {
+      return function(dest) {
+        return _this.setAddonsFolder(dest);
+      };
+    })(this));
     self = this;
-    $("#download-all").on('click', (function(_this) {
+    $(this.downloadAllBtnEl).on('click', (function(_this) {
       return function(e) {
         var err;
         try {
@@ -53,7 +82,21 @@ App = (function() {
         }
       };
     })(this));
-    $("body").on('click', '.download', (function(_this) {
+    $("body").on('click', "a[href]", function(e) {
+      var href;
+      e.preventDefault();
+      href = e.target.getAttribute("href");
+      return window.gui.Shell.openExternal(href);
+    });
+    $("body").on('click', "#config-button", function(e) {
+      e.preventDefault();
+      return self.setAddonsFolder(gh.addonsFolder);
+    });
+    $("body").on('change', this.fileDialogEl, function(e) {
+      gh.setAddonsFolder(this.value);
+      return self.setAddonsTooltip(this.value);
+    });
+    $("body").on('click', this.downloadBtnClassEl, (function(_this) {
       return function(e) {
         var $el, name, url;
         $el = $(e.target).parents('.module');
@@ -65,7 +108,7 @@ App = (function() {
         return gh.downloadRepo(name, url);
       };
     })(this));
-    return $("#message").on('click', '.close', (function(_this) {
+    return $(this.messageEl).on('click', '.close', (function(_this) {
       return function(e) {
         return self.removeMessage();
       };
@@ -74,12 +117,12 @@ App = (function() {
 
   App.prototype.updateView = function(data) {
     var $el, html, reposSource, template;
-    reposSource = $("#repo-template").html();
+    reposSource = $(this.repoTemplateEl).html();
     template = Handlebars.compile(reposSource);
     html = template(data);
     $el = $("[data-repo-id=" + data.id + "]");
     if ($el.length === 0) {
-      $("#repos").append(html);
+      $(this.reposEl).append(html);
     } else {
       $el.replaceWith(html);
     }
@@ -88,7 +131,7 @@ App = (function() {
 
   App.prototype.sortModules = function() {
     var $modules, $modulesContainer;
-    $modulesContainer = $("#repos");
+    $modulesContainer = $(this.reposEl);
     $modules = $modulesContainer.children('.module');
     $modules.sort(function(a, b) {
       var aStr, bStr;
@@ -109,16 +152,29 @@ App = (function() {
     return $("[data-repo-name=" + name + "]").addClass("done");
   };
 
+  App.prototype.setModuleError = function(name) {
+    return $("[data-repo-name=" + name + "]").addClass("error");
+  };
+
   App.prototype.flashMessage = function(msg) {
     var $el;
     console.log(msg);
-    $el = $("#message p");
+    $el = $("" + this.messageEl + " p");
     $el.html(msg);
     return $("body").addClass('message');
   };
 
   App.prototype.removeMessage = function() {
     return $("body").removeClass('message');
+  };
+
+  App.prototype.setAddonsFolder = function(baseDir) {
+    $(this.fileDialogEl).attr("nwworkingdir", baseDir);
+    return $(this.fileDialogEl).click();
+  };
+
+  App.prototype.setAddonsTooltip = function(dest) {
+    return $(this.configTooltipEl).html(dest);
   };
 
   return App;
