@@ -5,8 +5,8 @@
   "window": {
     "icon": "app.ico",
     "title": "VikinghugUI Downloader",
-    "toolbar": true,
-    "frame": true,
+    "toolbar": false,
+    "frame": false,
     "width": 450,
     "height": 700,
     "position": "mouse",
