@@ -419,10 +419,6 @@ ul.no-bullet,
   color: #fff;
   background-color: rgba(60,184,120,0.99);
 }
-* {
-  -webkit-user-select: none;
-  -webkit-app-region: drag;
-}
 html,
 body {
   width: 100%;
@@ -432,6 +428,7 @@ body {
 }
 body {
   -webkit-app-region: drag;
+  -webkit-user-select: none;
   background-color: #201e2d;
   font-size: 16px;
   line-height: 1.2;
