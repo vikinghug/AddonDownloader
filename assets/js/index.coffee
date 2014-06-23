@@ -3,6 +3,7 @@
 
 $            = require('jquery')
 Handlebars   = require('handlebars')
+fs           = require('fs')
 events       = require('events')
 em           = new events.EventEmitter()
 gh           = require('./lib/github')
@@ -18,7 +19,8 @@ class App
   messageEl          : "#message"
   reposEl            : "#repos"
   repoTemplateEl     : "#repo-template"
-
+  timer              : false
+  secret             : 0
 
   constructor: ->
     @initView()
@@ -26,7 +28,19 @@ class App
     gh.getRepos("vikinghug")
 
 
-  initView: -> return
+  initView: ->
+    package_info = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+    win = window.gui.Window.get()
+    win.title = "#{package_info.name} - v#{package_info.version}"
+
+
+  checkDevCommand: ->
+    @timer  = false
+    win = window.gui.Window.get()
+    if @secret >= 2
+      win.showDevTools()
+    @secret = 0
+
 
   createEvents: ->
     # module events
@@ -42,6 +56,18 @@ class App
     gh.on "CONFIG:SET:ADDONSFOLDER", (dest) => @setAddonsFolder(dest)
 
     self = @
+    secretTimer = null
+
+    $("body").on "keyup", (e) ->
+      if not self.timer
+        self.timer = true
+        self.secretTimer = setTimeout(( => self.checkDevCommand() ), 3000)
+      # 119 == F8
+      self.secret++ if e.ctrlKey && e.keyCode == 119
+      if self.secret >= 2
+        clearTimeout(self.secretTimer)
+        self.checkDevCommand()
+
     $(@downloadAllBtnEl).on 'click', (e) =>
       try
         gh.downloadRepos()

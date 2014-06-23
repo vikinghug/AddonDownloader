@@ -1,14 +1,18 @@
 {
   "name": "VikinghugUI-Downloader",
   "main": "index.html",
-  "version": "0.0.4",
+  "version": "0.0.5-DEV",
   "window": {
     "icon": "app.ico",
     "title": "VikinghugUI Downloader",
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "width": 450,
     "height": 700,
+    "max_width": 600,
+    "max_height": 6000,
+    "min_width": 430,
+    "min_height": 400,
     "position": "mouse",
     "resizable": true
   },

@@ -1,9 +1,11 @@
 'use strict';
-var $, App, Data, Handlebars, em, events, gh;
+var $, App, Data, Handlebars, em, events, fs, gh;
 
 $ = require('jquery');
 
 Handlebars = require('handlebars');
+
+fs = require('fs');
 
 events = require('events');
 
@@ -30,16 +32,35 @@ App = (function() {
 
   App.prototype.repoTemplateEl = "#repo-template";
 
+  App.prototype.timer = false;
+
+  App.prototype.secret = 0;
+
   function App() {
     this.initView();
     this.createEvents();
     gh.getRepos("vikinghug");
   }
 
-  App.prototype.initView = function() {};
+  App.prototype.initView = function() {
+    var package_info, win;
+    package_info = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    win = window.gui.Window.get();
+    return win.title = "" + package_info.name + " - v" + package_info.version;
+  };
+
+  App.prototype.checkDevCommand = function() {
+    var win;
+    this.timer = false;
+    win = window.gui.Window.get();
+    if (this.secret >= 2) {
+      win.showDevTools();
+    }
+    return this.secret = 0;
+  };
 
   App.prototype.createEvents = function() {
-    var self;
+    var secretTimer, self;
     gh.on("MODULE:UPDATE", (function(_this) {
       return function(data) {
         return _this.updateView(data);
@@ -71,6 +92,24 @@ App = (function() {
       };
     })(this));
     self = this;
+    secretTimer = null;
+    $("body").on("keyup", function(e) {
+      if (!self.timer) {
+        self.timer = true;
+        self.secretTimer = setTimeout(((function(_this) {
+          return function() {
+            return self.checkDevCommand();
+          };
+        })(this)), 3000);
+      }
+      if (e.ctrlKey && e.keyCode === 119) {
+        self.secret++;
+      }
+      if (self.secret >= 2) {
+        clearTimeout(self.secretTimer);
+        return self.checkDevCommand();
+      }
+    });
     $(this.downloadAllBtnEl).on('click', (function(_this) {
       return function(e) {
         var err;
