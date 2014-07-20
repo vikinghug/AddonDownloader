@@ -2,9 +2,6 @@ db = window.localStorage
 
 _            = require('underscore')
 $            = require('jquery')
-domino       = require('domino')
-Zepto        = require('zepto-node')
-z            = Zepto(window)
 Handlebars   = require('handlebars')
 fs           = require('fs')
 events       = require('events')

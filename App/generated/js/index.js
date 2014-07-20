@@ -1,16 +1,10 @@
-var $, App, Handlebars, Zepto, db, domino, em, events, fs, gh, z, _;
+var $, App, Handlebars, db, em, events, fs, gh, _;
 
 db = window.localStorage;
 
 _ = require('underscore');
 
 $ = require('jquery');
-
-domino = require('domino');
-
-Zepto = require('zepto-node');
-
-z = Zepto(window);
 
 Handlebars = require('handlebars');
 
