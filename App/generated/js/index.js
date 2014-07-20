@@ -74,6 +74,11 @@ App = (function() {
 
   App.prototype.createEvents = function() {
     var secretTimer, self;
+    gh.on("MODULE:RESET", (function(_this) {
+      return function(name) {
+        return _this.setModuleReady(name);
+      };
+    })(this));
     gh.on("MODULE:UPDATE", (function(_this) {
       return function(data) {
         return _this.updateView(data);
@@ -261,6 +266,10 @@ App = (function() {
       }
     });
     return $modules.detach().appendTo($modulesContainer);
+  };
+
+  App.prototype.setModuleReady = function(name) {
+    return $("[data-repo-name=" + name + "]").removeClass("done");
   };
 
   App.prototype.setModuleDone = function(name) {

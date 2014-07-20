@@ -98,37 +98,42 @@ Github = (function(_super) {
   };
 
   Github.prototype.clearQueue = function() {
-    var err, fn, i, _i, _len, _ref, _results;
-    try {
-      _ref = this.queue;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        fn = _ref[i];
-        _results.push(fn[0].apply(this, fn[1]));
+    var err, fn;
+    if (this.queue.length > 0) {
+      try {
+        fn = this.queue.shift();
+        fn[1].push(this.clearQueue);
+        return fn[0].apply(this, fn[1]);
+      } catch (_error) {
+        err = _error;
+        return this.emit('MESSAGE:ADD', err.message);
       }
-      return _results;
-    } catch (_error) {
-      err = _error;
-      return this.emit('MESSAGE:ADD', err.message);
+    } else {
+      return this.emit('MESSAGE:ADD', "ALL DONE!");
     }
   };
 
+  Github.prototype.done = function() {
+    return this.clearQueue();
+  };
+
   Github.prototype.downloadRepos = function() {
-    var err, i, id, name, repo, _i, _len, _ref, _results;
+    var err, i, id, name, repo, self, _i, _len, _ref;
+    self = this;
     if (!db.addonsFolderSet) {
       this.updateAddonsFolder(db.addonsFolder);
       return this.addToQueue(this.downloadRepos);
     } else {
       try {
         _ref = JSON.parse(db.repos);
-        _results = [];
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
           repo = _ref[i];
           id = repo.id;
           name = repo.name;
-          _results.push(this.downloadRepo(name, id));
+          self.emit("MODULE:RESET", name);
+          this.addToQueue(this.downloadRepo, name, id, this.done);
         }
-        return _results;
+        return this.clearQueue();
       } catch (_error) {
         err = _error;
         return this.emit('MESSAGE:ADD', err.message);
@@ -136,10 +141,11 @@ Github = (function(_super) {
     }
   };
 
-  Github.prototype.downloadRepo = function(name, id) {
+  Github.prototype.downloadRepo = function(name, id, callback) {
     var currentBranch, dest, repo, self, url;
+    self = this;
+    self.emit("MODULE:RESET", name);
     repo = this.findRepo(id);
-    cs.debug(repo);
     currentBranch = repo.current_branch;
     url = _.findWhere(repo.branches, {
       name: currentBranch
@@ -151,7 +157,6 @@ Github = (function(_super) {
       cs.debug('downloadRepo: ->');
       cs.debug(db.addonsFolder, name);
       dest = path.join(db.addonsFolder, name);
-      self = this;
       return fs.exists(dest, (function(_this) {
         return function(bool) {
           var err;
@@ -166,7 +171,7 @@ Github = (function(_super) {
           }
           try {
             if (which('git')) {
-              cs.info("# GIT EXISTS, CLONING REPO");
+              console.log("# GIT EXISTS, CLONING REPO");
               url = url.substring(0, url.indexOf('#'));
               dest = "\"" + dest + "\"";
               return git.exec('clone', {
@@ -175,10 +180,13 @@ Github = (function(_super) {
                 if (err) {
                   self.sendError(err);
                 }
-                return self.emit("MODULE:DONE", name);
+                self.emit("MODULE:DONE", name);
+                if (callback != null) {
+                  return callback.apply(self);
+                }
               });
             } else {
-              cs.info("# GIT DOES NOT EXIST, DOWNLOADING REPO");
+              console.log("# GIT DOES NOT EXIST, DOWNLOADING REPO");
               return ghdownload(url, dest).on('dir', function(dir) {
                 return cs.debug(dir);
               }).on('file', function(file) {
@@ -188,7 +196,10 @@ Github = (function(_super) {
               }).on('error', function(err) {
                 return console.error(err);
               }).on('end', function() {
-                return self.emit("MODULE:DONE", name);
+                self.emit("MODULE:DONE", name);
+                if (callback != null) {
+                  return callback.apply(self);
+                }
               });
             }
           } catch (_error) {
