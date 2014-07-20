@@ -23,11 +23,10 @@ class App
   secret             : 0
 
   constructor: ->
-    console.log db
-    @initView()
-    @createEvents()
     gh.init()
     gh.getRepos("vikinghug")
+    @initView()
+    @createEvents()
 
 
   initView: ->
@@ -136,8 +135,6 @@ class App
         $menuEl.removeClass("bottom")
         $menuEl.addClass("top")
 
-      console.log $menuEl
-
     $(@messageEl).on 'click', '.close', (e) =>
       @removeMessage()
 
@@ -153,7 +150,7 @@ class App
 
 
   updateView: (data) ->
-    console.log "updateView"
+    console.log "updateView", data
     reposSource = $(@repoTemplateEl).html()
     template    = Handlebars.compile(reposSource)
     html        = template(data)

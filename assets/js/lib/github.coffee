@@ -162,17 +162,16 @@ class Github extends EventEmitter
       repos = JSON.parse( db.getItem("repos") )
       index = @findRepoIndex(id)
       console.log "index: ", index
-      branch ?= "master"
+      branch = branch ? "master"
       repos[index].current_branch = branch
-      @updateRepo(repos[index], index)
+      return @updateRepo(repos[index], index)
     catch err
       @sendError(err)
 
   addRepo: (repo, branch) ->
     console.log "addRepo"
     try
-      repos = JSON.parse( db.getItem("repos") )
-      @setBranch(repo.id, branch)
+      repos = JSON.parse(db.getItem("repos"))
       repos.push(repo)
       db.repos = JSON.stringify(repos)
       return repo
@@ -183,10 +182,11 @@ class Github extends EventEmitter
     console.log "updateRepo"
     try
       repos = JSON.parse( db.getItem("repos") )
-      _.extend(repos[index], repo)
-      repos[index].current_branch ?= "master"
-      console.log "### current_branch: ", repos[index].current_branch
+      repo = _.extend(repos[index], repo)
+      repos[index].current_branch = repos[index].current_branch ? "master"
       repos[index].branches = @updateBranches(repos[index].branches, repos[index].current_branch)
+      console.log repos[index]
+      console.log repos[index].branches
       db.repos = JSON.stringify(repos)
       return repos[index]
     catch err
@@ -196,7 +196,6 @@ class Github extends EventEmitter
     for key, value of branches
       value.current = if value.name == currentBranch then true else false
     return branches
-
 
     # console.log branches
 
@@ -209,9 +208,10 @@ class Github extends EventEmitter
       for repo, i in res.body
         index = self.findRepoIndex(repo.id)
         if index != null and index != undefined
-          repo = self.updateRepo(repo, index)
+          repo = self.setBranch(repo.id)
         else
           repo = self.addRepo(repo)
+          repo = self.setBranch(repo.id)
 
         self.emit("MODULE:UPDATE", repo)
 

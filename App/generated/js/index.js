@@ -40,11 +40,10 @@ App = (function() {
   App.prototype.secret = 0;
 
   function App() {
-    console.log(db);
-    this.initView();
-    this.createEvents();
     gh.init();
     gh.getRepos("vikinghug");
+    this.initView();
+    this.createEvents();
   }
 
   App.prototype.initView = function() {
@@ -196,15 +195,14 @@ App = (function() {
             "top": -$menuEl.height()
           });
           $menuEl.removeClass("top");
-          $menuEl.addClass("bottom");
+          return $menuEl.addClass("bottom");
         } else {
           $menuEl.css({
             "top": 50
           });
           $menuEl.removeClass("bottom");
-          $menuEl.addClass("top");
+          return $menuEl.addClass("top");
         }
-        return console.log($menuEl);
       };
     })(this));
     return $(this.messageEl).on('click', '.close', (function(_this) {
@@ -227,7 +225,7 @@ App = (function() {
 
   App.prototype.updateView = function(data) {
     var $el, html, reposSource, template;
-    console.log("updateView");
+    console.log("updateView", data);
     reposSource = $(this.repoTemplateEl).html();
     template = Handlebars.compile(reposSource);
     html = template(data);

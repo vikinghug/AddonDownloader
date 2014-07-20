@@ -219,9 +219,7 @@ Github = (function(_super) {
       repos = JSON.parse(db.getItem("repos"));
       index = this.findRepoIndex(id);
       console.log("index: ", index);
-      if (branch == null) {
-        branch = "master";
-      }
+      branch = branch != null ? branch : "master";
       repos[index].current_branch = branch;
       return this.updateRepo(repos[index], index);
     } catch (_error) {
@@ -235,7 +233,6 @@ Github = (function(_super) {
     console.log("addRepo");
     try {
       repos = JSON.parse(db.getItem("repos"));
-      this.setBranch(repo.id, branch);
       repos.push(repo);
       db.repos = JSON.stringify(repos);
       return repo;
@@ -246,16 +243,15 @@ Github = (function(_super) {
   };
 
   Github.prototype.updateRepo = function(repo, index) {
-    var err, repos, _base;
+    var err, repos, _ref;
     console.log("updateRepo");
     try {
       repos = JSON.parse(db.getItem("repos"));
-      _.extend(repos[index], repo);
-      if ((_base = repos[index]).current_branch == null) {
-        _base.current_branch = "master";
-      }
-      console.log("### current_branch: ", repos[index].current_branch);
+      repo = _.extend(repos[index], repo);
+      repos[index].current_branch = (_ref = repos[index].current_branch) != null ? _ref : "master";
       repos[index].branches = this.updateBranches(repos[index].branches, repos[index].current_branch);
+      console.log(repos[index]);
+      console.log(repos[index].branches);
       db.repos = JSON.stringify(repos);
       return repos[index];
     } catch (_error) {
@@ -288,9 +284,10 @@ Github = (function(_super) {
           repo = _ref[i];
           index = self.findRepoIndex(repo.id);
           if (index !== null && index !== void 0) {
-            repo = self.updateRepo(repo, index);
+            repo = self.setBranch(repo.id);
           } else {
             repo = self.addRepo(repo);
+            repo = self.setBranch(repo.id);
           }
           _results.push(self.emit("MODULE:UPDATE", repo));
         }
