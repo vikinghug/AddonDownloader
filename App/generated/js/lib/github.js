@@ -176,7 +176,7 @@ Github = (function(_super) {
                 if (err) {
                   self.sendError(err);
                 }
-                return cs.debug("done");
+                return self.emit("MODULE:DONE", name);
               });
             } else {
               cs.info("# GIT DOES NOT EXIST, DOWNLOADING REPO");

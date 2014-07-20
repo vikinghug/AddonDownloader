@@ -137,7 +137,7 @@ class Github extends EventEmitter
 
             git.exec 'clone', {b: branch}, [url, dest], (err) =>
               self.sendError(err) if err
-              cs.debug "done"
+              self.emit("MODULE:DONE", name)
           else
             cs.info "# GIT DOES NOT EXIST, DOWNLOADING REPO"
             ghdownload(url, dest)
