@@ -154,7 +154,7 @@ Github = (function(_super) {
       self = this;
       return fs.exists(dest, (function(_this) {
         return function(bool) {
-          var branch, err, urlsplit;
+          var err;
           if (bool) {
             try {
               fs.rmrfSync(dest);
@@ -167,11 +167,10 @@ Github = (function(_super) {
           try {
             if (which('git')) {
               cs.info("# GIT EXISTS, CLONING REPO");
-              urlsplit = url.split('#');
-              url = urlsplit[0];
-              branch = urlsplit[1];
+              url = url.substring(0, url.indexOf('#'));
+              dest = "\"" + dest + "\"";
               return git.exec('clone', {
-                b: branch
+                b: currentBranch
               }, [url, dest], function(err) {
                 if (err) {
                   self.sendError(err);

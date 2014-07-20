@@ -131,11 +131,10 @@ class Github extends EventEmitter
         try
           if (which('git'))
             cs.info "# GIT EXISTS, CLONING REPO"
-            urlsplit = url.split('#')
-            url = urlsplit[0]
-            branch = urlsplit[1]
+            url      = url.substring(0, url.indexOf('#'))
+            dest     = "\"#{dest}\""
 
-            git.exec 'clone', {b: branch}, [url, dest], (err) =>
+            git.exec 'clone', {b: currentBranch}, [url, dest], (err) =>
               self.sendError(err) if err
               self.emit("MODULE:DONE", name)
           else
