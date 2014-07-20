@@ -49,6 +49,7 @@ class App
 
   createEvents: ->
     # module events
+    gh.on "MODULE:RESET", (name) => @setModuleReady(name)
     gh.on "MODULE:UPDATE", (data) => @updateView(data)
     gh.on "MODULE:DONE", (name) => @setModuleDone(name)
     gh.on "MODULE:ERROR", (name) => @setModuleError(name)
@@ -182,6 +183,7 @@ class App
 
     $modules.detach().appendTo($modulesContainer)
 
+  setModuleReady: (name) -> $("[data-repo-name=#{name}]").removeClass("done")
   setModuleDone: (name) -> $("[data-repo-name=#{name}]").addClass("done")
   setModuleError: (name) -> $("[data-repo-name=#{name}]").addClass("error")
 
