@@ -43,6 +43,18 @@ a {
 
 
 //
+// GENERIC HELPERS
+// ******************************************************************
+pseudo-content(width = null, height = null, position = relative, display = inline-block) {
+  display: display;
+  content: '';
+  width: width;
+  height: height;
+  position: position;
+}
+
+
+//
 // HEADER
 // ******************************************************************
 
@@ -53,7 +65,7 @@ header {
   text-align: left;
   position: fixed;
   top: 0;
-  z-index: 10;
+  z-index: 1000;
 
   h1 {
     color: yellow;
@@ -93,33 +105,6 @@ download-button() {
 }
 
 
-screen-color(color) {
-  h3 { color: color; }
-  .screen > span {
-    box-shadow: inset 0 0 0 1px color;
-    color: color;
-  }
-}
-
-screen-background-color(color) {
-  background-color: color;
-  &:before {
-    background-color: color;
-  }
-}
-
-list-item(icon, color) {
-  line-height: 1.6;
-  display: block;
-  color: color;
-  &:before {
-    margin-right: 6px;
-    font-size: .8em;
-    line-height: 1.25;
-    content: icon;
-  }
-}
-
 //
 // MODULES
 // ******************************************************************
@@ -149,10 +134,17 @@ list-item(icon, color) {
     }
   }
 
+  .version {
+    margin-left: 5px;
+    font-size: .65em;
+    color: light-purple;
+  }
+
   .branches {
     display: inline-block;
 
     &:hover {
+      ~ .download { z-index: 301; }
       button.dropdown {
         background: light-grey;
         color: purple;
@@ -161,6 +153,7 @@ list-item(icon, color) {
         color: light-purple;
         opacity: .98;
         left: 0;
+        right: 0;
       }
     }
 
@@ -176,12 +169,27 @@ list-item(icon, color) {
       z-index: 3;
     }
 
-    ul {
+    ul.menu {
       @extend ul.no-bullet;
       background: purple;
+      opacity: 0;
       position: absolute;
+      right: -1000px;
       text-align: left;
       top: 22px;
+      transition: .4s opacity ease;
+      z-index: 100;
+
+      menu-hover-cover(direction) {
+        pseudo-content(height: 50px, position: absolute, display: block);
+        left: 0;
+        right: 0;
+        {direction}: -50px;
+      }
+
+      &.bottom:after { menu-hover-cover: bottom; }
+      &.top:before { menu-hover-cover: top; }
+
       li {
         box-shadow: 0 1px black;
         padding: 0 15px;
@@ -192,23 +200,17 @@ list-item(icon, color) {
         a {
           cursor: pointer;
           display: block;
-          padding: 15px 0;
+          padding: 15px 60px 15px 0;
 
-          &:hover {
-            color: yellow;
-          }
+          &:hover { color: yellow; }
 
           &:before {
+            pseudo-content(width: 12px, height: 12px);
             border-radius: 1000px;
             box-shadow: 0 0 0 1px light-purple;
-            display: inline-block;
-            content: '';
-            width: 12px;
-            height: 12px;
             margin-right: 10px;
             line-height: 1em;
             overflow: visible;
-            position: relative;
             cursor: default;
             z-index: 100;
           }
@@ -217,57 +219,7 @@ list-item(icon, color) {
             background: yellow;
           }
         }
-      }
 
-    }
-
-    .menu {
-      transition: .4s opacity ease;
-      position: absolute;
-      z-index: 300;
-      right: -1000px;
-      opacity: 0;
-
-      &.bottom {
-        &:after {
-          content: '';
-          display: block;
-          height: 50px;
-          left: 0;
-          right: 0;
-          bottom: -50px;
-          position: absolute;
-        }
-      }
-
-      &.top {
-        &:before {
-          content: '';
-          display: block;
-          height: 50px;
-          left: 0;
-          right: 0;
-          top: -50px;
-          position: absolute;
-        }
-      }
-
-
-
-      a { padding-right: 60px; }
-      .download {
-        font-size: 0;
-        padding-left: 0;
-        padding-right: 0;
-        margin-right: 0px;
-        position: absolute;
-        top: 0;
-        right: 15px;
-
-        &:after {
-          color: light-grey;
-          margin: 0;
-        }
       }
     }
   }
@@ -285,6 +237,8 @@ list-item(icon, color) {
     background: rgba(light-purple, .35);
     box-shadow: inset 0 0 0 1px purple;
     line-height: 1em;
+    position: relative;
+
     &:before {
       font-size: 17px;
       margin: 0;
@@ -292,7 +246,6 @@ list-item(icon, color) {
       height: 0;
       position: relative;
       top: 2px;
-
     }
 
     span { display: none; }
@@ -322,33 +275,6 @@ list-item(icon, color) {
 }
 
 
-
-//
-// CONTRIBUTORS
-// ******************************************************************
-section.contributors {
-  .panel {
-    height: 200px;
-    margin-bottom: 20px;
-  }
-  h3 {
-    color: red;
-    font-size: 2em;
-    font-weight: 100;
-    margin: 0;
-    padding: 0;
-  }
-  h4 {
-    color: light-purple;
-    border-bottom: 1px solid purple;
-    margin-bottom: 10px;
-  }
-  li {
-    margin-bottom: .5em;
-  }
-}
-
-
 //
 // FOOTER
 // ******************************************************************
@@ -361,7 +287,7 @@ footer {
   left: 0;
   text-align: center;
   padding: 10px;
-  z-index: 10;
+  z-index: 1000;
 }
 
 section {
@@ -425,8 +351,7 @@ body.message {
   }
 
   &:before {
-    content: '';
-    position: absolute;
+    pseudo-content(position: absolute);
     top: 0;
     right: 0;
     bottom: 0;
@@ -436,8 +361,7 @@ body.message {
   }
 
   &:after {
-    content: '';
-    position: fixed;
+    pseudo-content(position: fixed);
     top: 0;
     right: 0;
     bottom: 0;
