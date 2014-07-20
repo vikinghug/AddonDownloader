@@ -63,7 +63,7 @@ class Github extends EventEmitter
     'VikingXPBar'
   ]
 
-  queue           : []
+  queue      : []
 
   constructor: ->
     self = @
@@ -88,13 +88,20 @@ class Github extends EventEmitter
     @queue.push([fn, args])
 
   clearQueue: ->
-    try
-      for fn, i in @queue
-        fn[0].apply(this,fn[1])
-    catch err
-      @emit('MESSAGE:ADD', err.message)
+    if @queue.length > 0
+      try
+        fn = @queue.shift()
+        fn[1].push(@clearQueue)
+        fn[0].apply(this, fn[1])
+      catch err
+        @emit('MESSAGE:ADD', err.message)
+    else
+      @emit('MESSAGE:ADD', "ALL DONE!")
+
+  done: -> @clearQueue()
 
   downloadRepos: ->
+    self = this
     if not db.addonsFolderSet
       @updateAddonsFolder(db.addonsFolder)
       @addToQueue(@downloadRepos)
@@ -103,15 +110,22 @@ class Github extends EventEmitter
         for repo, i in JSON.parse( db.repos )
           id = repo.id
           name = repo.name
-          @downloadRepo(name, id)
+          self.emit("MODULE:RESET", name)
+          @addToQueue(@downloadRepo, name, id, @done)
+
+        @clearQueue()
+
       catch err
         @emit('MESSAGE:ADD', err.message)
 
-  downloadRepo: (name, id) ->
+  downloadRepo: (name, id, callback) ->
+    self = this
+    self.emit("MODULE:RESET", name)
+
     repo          = @findRepo(id)
-    cs.debug repo
     currentBranch = repo.current_branch
     url           = _.findWhere(repo.branches, {name: currentBranch}).download_url
+
     if not db.addonsFolderSet
       @updateAddonsFolder(db.addonsFolder)
       @addToQueue(@downloadRepo, name, url)
@@ -120,7 +134,6 @@ class Github extends EventEmitter
       cs.debug db.addonsFolder, name
       dest = path.join(db.addonsFolder, name)
 
-      self = @
       fs.exists dest, (bool) =>
         if bool
           try
@@ -128,23 +141,27 @@ class Github extends EventEmitter
           catch err
             self.emit('MESSAGE:ADD', err.message)
             self.emit('MODULE:ERROR', name)
+
         try
           if (which('git'))
-            cs.info "# GIT EXISTS, CLONING REPO"
+            console.log "# GIT EXISTS, CLONING REPO"
             url      = url.substring(0, url.indexOf('#'))
             dest     = "\"#{dest}\""
 
             git.exec 'clone', {b: currentBranch}, [url, dest], (err) =>
               self.sendError(err) if err
               self.emit("MODULE:DONE", name)
+              callback.apply(self) if callback?
           else
-            cs.info "# GIT DOES NOT EXIST, DOWNLOADING REPO"
+            console.log "# GIT DOES NOT EXIST, DOWNLOADING REPO"
             ghdownload(url, dest)
               .on 'dir', (dir) -> cs.debug(dir)
               .on 'file', (file) -> cs.debug(file)
               .on 'zip', (zipUrl) -> cs.debug(zipUrl)
               .on 'error', (err) -> console.error(err)
-              .on 'end', => self.emit("MODULE:DONE", name)
+              .on 'end', =>
+                self.emit("MODULE:DONE", name)
+                callback.apply(self) if callback?
 
         catch err
           @sendError(err)
