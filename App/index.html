@@ -19,7 +19,7 @@
       <script id="repo-template" type="text/x-handlebars-template">
         <li class="module" data-repo-id="{{id}}" data-repo-url="{{ssh_url}}" data-repo-name="{{name}}" data-current-branch="{{current_branch}}">
 
-          <a href="{{this.html_url}}" target="_blank">{{name}}</a>
+          <a href="{{this.html_url}}" target="_blank">{{name}}<small class="version">v{{version}}</small></a>
 
 
           <span class="right">
