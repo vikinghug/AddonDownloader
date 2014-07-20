@@ -2,11 +2,14 @@ db = window.localStorage
 
 _            = require('underscore')
 $            = require('jquery')
+cs           = require('calmsoul')
 Handlebars   = require('handlebars')
 fs           = require('fs')
 events       = require('events')
 em           = new events.EventEmitter()
 gh           = require('./lib/github')
+
+cs.set(info: false)
 
 class App
 
@@ -150,7 +153,7 @@ class App
 
 
   updateView: (data) ->
-    console.log "updateView", data
+    cs.debug "updateView", data
     reposSource = $(@repoTemplateEl).html()
     template    = Handlebars.compile(reposSource)
     html        = template(data)
@@ -183,7 +186,7 @@ class App
   setModuleError: (name) -> $("[data-repo-name=#{name}]").addClass("error")
 
   flashMessage: (msg) ->
-    console.log msg
+    cs.debug msg
     $el = $("#{@messageEl} p")
     $el.html(msg)
     $("body").addClass('message')

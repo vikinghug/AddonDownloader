@@ -1,1 +1,36 @@
-{"name":"VikinghugUI-Downloader","main":"index.html","version":"0.0.6-DEV","window":{"icon":"app.ico","title":"VikinghugUI Downloader","toolbar":true,"frame":true,"width":450,"height":700,"max_width":600,"max_height":6000,"min_width":430,"min_height":400,"position":"mouse","resizable":true},"dependencies":{"exec":"^0.1.1","fs.extra":"^1.2.1","github-download":"^0.3.0","handlebars":"^2.0.0","jquery":"^2.1.1","mustache":"^0.8.2","octonode":"^0.6.3","superagent":"^0.18.2","underscore":"^1.6.0","watchjs":"0.0.0"},"devDependencies":{}}
+{
+  "name": "VikinghugUI-Downloader",
+  "main": "index.html",
+  "version": "0.0.6-DEV",
+  "window": {
+    "icon": "app.ico",
+    "title": "VikinghugUI Downloader",
+    "toolbar": true,
+    "frame": true,
+    "width": 450,
+    "height": 700,
+    "max_width": 600,
+    "max_height": 6000,
+    "min_width": 430,
+    "min_height": 400,
+    "position": "mouse",
+    "resizable": true
+  },
+  "dependencies": {
+    "calmsoul": "0.0.2",
+    "exec": "^0.1.1",
+    "fs.extra": "^1.2.1",
+    "git-clone": "0.0.4",
+    "git-wrapper": "^0.1.1",
+    "github-download": "^0.3.0",
+    "handlebars": "^2.0.0",
+    "jquery": "^2.1.1",
+    "mustache": "^0.8.2",
+    "octonode": "^0.6.3",
+    "shelljs": "^0.3.0",
+    "superagent": "^0.18.2",
+    "underscore": "^1.6.0",
+    "watchjs": "0.0.0"
+  },
+  "devDependencies": {}
+}
