@@ -36,6 +36,9 @@ echo $nodePath
 echo $nwFile
 echo $releaseFile
 echo $appFolder
+cd $appFolder
+npm install
+cd ..
 TestFiles
 ZipFiles $nwFile $appFolder
 cmd /c copy /b $nodePath+$nwFile $releaseFile

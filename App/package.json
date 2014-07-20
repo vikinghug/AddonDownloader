@@ -1,7 +1,7 @@
 {
   "name": "VikinghugUI-Downloader",
   "main": "index.html",
-  "version": "0.0.6-DEV",
+  "version": "0.0.8-DEV",
   "window": {
     "icon": "app.ico",
     "title": "VikinghugUI Downloader",
