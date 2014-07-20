@@ -1,4 +1,4 @@
-var EventEmitter, Github, WatchJS, appData, callWatchers, client, db, exec, fs, getKey, ghdownload, github, keys, path, request, unwatch, watch, _,
+var EventEmitter, Git, Github, WatchJS, appData, callWatchers, client, cs, db, exec, fs, getKey, ghdownload, git, github, keys, path, request, unwatch, watch, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
@@ -6,6 +6,8 @@ var EventEmitter, Github, WatchJS, appData, callWatchers, client, db, exec, fs, 
 db = window.localStorage;
 
 _ = require('underscore');
+
+cs = require('calmsoul');
 
 path = require('path');
 
@@ -19,7 +21,9 @@ github = require('octonode');
 
 ghdownload = require('github-download');
 
-WatchJS = require("watchjs");
+WatchJS = require('watchjs');
+
+Git = require('git-wrapper');
 
 watch = WatchJS.watch;
 
@@ -29,9 +33,11 @@ callWatchers = WatchJS.callWatchers;
 
 EventEmitter = require('events').EventEmitter;
 
-appData = process.env.APPDATA != null ? process.env.APPDATA : path.join(process.env.HOME, ".downloads");
+require('shelljs/global');
 
-keys = ["894b9db89f78b7142263966c69cabf63cec31a19", "96234b48504bcb43a1d0a9e11cd7e596b45f4e54", "16cd039c3347e9689bf2e7d3eccdcfb627bec2fc", "3fe23a32720c1d08a38dc488c3e5128ea809fdaa"];
+appData = process.env.APPDATA != null ? process.env.APPDATA : path.join(process.env.HOME, '.downloads');
+
+keys = ['894b9db89f78b7142263966c69cabf63cec31a19', '96234b48504bcb43a1d0a9e11cd7e596b45f4e54', '16cd039c3347e9689bf2e7d3eccdcfb627bec2fc', '3fe23a32720c1d08a38dc488c3e5128ea809fdaa'];
 
 getKey = function() {
   return keys[Math.floor(Math.random() * keys.length + 1)];
@@ -39,19 +45,25 @@ getKey = function() {
 
 client = github.client(getKey());
 
+git = new Git();
+
+cs.set({
+  'info': true
+});
+
 Github = (function(_super) {
   __extends(Github, _super);
 
-  Github.prototype.blacklist = ["AddonDownloader", "vikinghug.com", "VikingActionBarSet", "VikingDocs", "VikingQuestTrackerSet", "VikingMedic"];
+  Github.prototype.blacklist = ['AddonDownloader', 'vikinghug.com', 'VikingActionBarSet', 'VikingDocs', 'VikingQuestTrackerSet', 'VikingMedic'];
 
-  Github.prototype.whitelist = ["VikingActionBarFrame", "VikingActionBarShortcut", "VikingBuddies", "VikingClassResources", "VikingContextMenuPlayer", "VikingGroupFrame", "VikingHealthShieldBar", "Vikinghug", "VikingInventory", "VikingLibrary", "VikingMiniMap", "VikingNameplates", "VikingSettings", "VikingSprintMeter", "VikingTooltips", "VikingTradeskills", "VikingUnitFrames", "VikingXPBar"];
+  Github.prototype.whitelist = ['VikingActionBarFrame', 'VikingActionBarShortcut', 'VikingBuddies', 'VikingClassResources', 'VikingContextMenuPlayer', 'VikingGroupFrame', 'VikingHealthShieldBar', 'Vikinghug', 'VikingInventory', 'VikingLibrary', 'VikingMiniMap', 'VikingNameplates', 'VikingSettings', 'VikingSprintMeter', 'VikingTooltips', 'VikingTradeskills', 'VikingUnitFrames', 'VikingXPBar'];
 
   Github.prototype.queue = [];
 
   function Github() {
     var self;
     self = this;
-    watch(this, ["addonsFolderSet"], function(key, command, data) {
+    watch(this, ['addonsFolderSet'], function(key, command, data) {
       if (data) {
         return self.clearQueue();
       }
@@ -60,9 +72,9 @@ Github = (function(_super) {
   }
 
   Github.prototype.init = function() {
-    if (db.addonsFolderSet === "false") {
-      console.log("NOPE");
-      return this.updateAddonsFolder(path.join(appData, "NCSOFT", "WildStar", "addons"));
+    if (db.addonsFolderSet === 'false') {
+      cs.debug('NOPE');
+      return this.updateAddonsFolder(path.join(appData, 'NCSOFT', 'WildStar', 'addons'));
     }
   };
 
@@ -76,7 +88,7 @@ Github = (function(_super) {
   };
 
   Github.prototype.updateAddonsFolder = function(dest) {
-    return this.emit("CONFIG:SET:ADDONSFOLDER", dest);
+    return this.emit('CONFIG:SET:ADDONSFOLDER', dest);
   };
 
   Github.prototype.addToQueue = function() {
@@ -97,7 +109,7 @@ Github = (function(_super) {
       return _results;
     } catch (_error) {
       err = _error;
-      return this.emit("MESSAGE:ADD", err.message);
+      return this.emit('MESSAGE:ADD', err.message);
     }
   };
 
@@ -119,7 +131,7 @@ Github = (function(_super) {
         return _results;
       } catch (_error) {
         err = _error;
-        return this.emit("MESSAGE:ADD", err.message);
+        return this.emit('MESSAGE:ADD', err.message);
       }
     }
   };
@@ -127,7 +139,7 @@ Github = (function(_super) {
   Github.prototype.downloadRepo = function(name, id) {
     var currentBranch, dest, repo, self, url;
     repo = this.findRepo(id);
-    console.log(repo);
+    cs.debug(repo);
     currentBranch = repo.current_branch;
     url = _.findWhere(repo.branches, {
       name: currentBranch
@@ -136,34 +148,50 @@ Github = (function(_super) {
       this.updateAddonsFolder(db.addonsFolder);
       return this.addToQueue(this.downloadRepo, name, url);
     } else {
-      console.log("downloadRepo: ->");
-      console.log(db.addonsFolder, name);
+      cs.debug('downloadRepo: ->');
+      cs.debug(db.addonsFolder, name);
       dest = path.join(db.addonsFolder, name);
       self = this;
       return fs.exists(dest, (function(_this) {
         return function(bool) {
-          var err;
+          var branch, err, urlsplit;
           if (bool) {
             try {
               fs.rmrfSync(dest);
             } catch (_error) {
               err = _error;
-              self.emit("MESSAGE:ADD", err.message);
-              self.emit("MODULE:ERROR", name);
+              self.emit('MESSAGE:ADD', err.message);
+              self.emit('MODULE:ERROR', name);
             }
           }
           try {
-            return ghdownload(url, dest).on('dir', function(dir) {
-              return console.log(dir);
-            }).on('file', function(file) {
-              return console.log(file);
-            }).on('zip', function(zipUrl) {
-              return console.log(zipUrl);
-            }).on('error', function(err) {
-              return console.error(err);
-            }).on('end', function() {
-              return self.emit("MODULE:DONE", name);
-            });
+            if (which('git')) {
+              cs.info("# GIT EXISTS, CLONING REPO");
+              urlsplit = url.split('#');
+              url = urlsplit[0];
+              branch = urlsplit[1];
+              return git.exec('clone', {
+                b: branch
+              }, [url, dest], function(err) {
+                if (err) {
+                  self.sendError(err);
+                }
+                return cs.debug("done");
+              });
+            } else {
+              cs.info("# GIT DOES NOT EXIST, DOWNLOADING REPO");
+              return ghdownload(url, dest).on('dir', function(dir) {
+                return cs.debug(dir);
+              }).on('file', function(file) {
+                return cs.debug(file);
+              }).on('zip', function(zipUrl) {
+                return cs.debug(zipUrl);
+              }).on('error', function(err) {
+                return console.error(err);
+              }).on('end', function() {
+                return self.emit("MODULE:DONE", name);
+              });
+            }
           } catch (_error) {
             err = _error;
             return _this.sendError(err);
@@ -175,16 +203,16 @@ Github = (function(_super) {
 
   Github.prototype.findRepo = function(id) {
     var index, repos;
-    repos = JSON.parse(db.getItem("repos"));
+    repos = JSON.parse(db.getItem('repos'));
     index = this.findRepoIndex(id);
     return repos[index];
   };
 
   Github.prototype.findRepoIndex = function(id) {
     var err, i, repo, repos, _i, _len;
-    console.log("findRepoIndex", id);
+    cs.debug('findRepoIndex', id);
     try {
-      repos = JSON.parse(db.getItem("repos"));
+      repos = JSON.parse(db.getItem('repos'));
       if (repos.length === 0) {
         return null;
       }
@@ -203,7 +231,7 @@ Github = (function(_super) {
 
   Github.prototype.resetBranches = function(branch) {
     var key, repos, value, _results;
-    repos = JSON.parse(db.getItem("repos"));
+    repos = JSON.parse(db.getItem('repos'));
     _results = [];
     for (key in repos) {
       value = repos[key];
@@ -214,12 +242,12 @@ Github = (function(_super) {
 
   Github.prototype.setBranch = function(id, branch) {
     var err, index, repos;
-    console.log("setBranch");
+    cs.debug('setBranch');
     try {
-      repos = JSON.parse(db.getItem("repos"));
+      repos = JSON.parse(db.getItem('repos'));
       index = this.findRepoIndex(id);
-      console.log("index: ", index);
-      branch = branch != null ? branch : "master";
+      cs.debug('index: ', index);
+      branch = branch != null ? branch : 'master';
       repos[index].current_branch = branch;
       return this.updateRepo(repos[index], index);
     } catch (_error) {
@@ -230,9 +258,9 @@ Github = (function(_super) {
 
   Github.prototype.addRepo = function(repo, branch) {
     var err, repos;
-    console.log("addRepo");
+    cs.debug('addRepo');
     try {
-      repos = JSON.parse(db.getItem("repos"));
+      repos = JSON.parse(db.getItem('repos'));
       repos.push(repo);
       db.repos = JSON.stringify(repos);
       return repo;
@@ -244,14 +272,14 @@ Github = (function(_super) {
 
   Github.prototype.updateRepo = function(repo, index) {
     var err, repos, _ref;
-    console.log("updateRepo");
+    cs.debug('updateRepo');
     try {
-      repos = JSON.parse(db.getItem("repos"));
+      repos = JSON.parse(db.getItem('repos'));
       repo = _.extend(repos[index], repo);
-      repos[index].current_branch = (_ref = repos[index].current_branch) != null ? _ref : "master";
+      repos[index].current_branch = (_ref = repos[index].current_branch) != null ? _ref : 'master';
       repos[index].branches = this.updateBranches(repos[index].branches, repos[index].current_branch);
-      console.log(repos[index]);
-      console.log(repos[index].branches);
+      cs.debug(repos[index]);
+      cs.debug(repos[index].branches);
       db.repos = JSON.stringify(repos);
       return repos[index];
     } catch (_error) {
@@ -272,7 +300,7 @@ Github = (function(_super) {
   Github.prototype.getRepos = function(owner) {
     var self;
     if (db.repos === void 0) {
-      db.setItem("repos", JSON.stringify([]));
+      db.setItem('repos', JSON.stringify([]));
     }
     self = this;
     return request.get('http://api.vikinghug.com/repos').end((function(_this) {
@@ -289,7 +317,7 @@ Github = (function(_super) {
             repo = self.addRepo(repo);
             repo = self.setBranch(repo.id);
           }
-          _results.push(self.emit("MODULE:UPDATE", repo));
+          _results.push(self.emit('MODULE:UPDATE', repo));
         }
         return _results;
       };
@@ -297,7 +325,7 @@ Github = (function(_super) {
   };
 
   Github.prototype.sendError = function(err) {
-    return this.emit("MESSAGE:ADD", err.message);
+    return this.emit('MESSAGE:ADD', err.message);
   };
 
   Github.prototype.filterForWhitelist = function(array) {

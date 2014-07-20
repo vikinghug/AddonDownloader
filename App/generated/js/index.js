@@ -1,10 +1,12 @@
-var $, App, Handlebars, db, em, events, fs, gh, _;
+var $, App, Handlebars, cs, db, em, events, fs, gh, _;
 
 db = window.localStorage;
 
 _ = require('underscore');
 
 $ = require('jquery');
+
+cs = require('calmsoul');
 
 Handlebars = require('handlebars');
 
@@ -15,6 +17,10 @@ events = require('events');
 em = new events.EventEmitter();
 
 gh = require('./lib/github');
+
+cs.set({
+  info: false
+});
 
 App = (function() {
   App.prototype.configBtnEl = "#config-button";
@@ -225,7 +231,7 @@ App = (function() {
 
   App.prototype.updateView = function(data) {
     var $el, html, reposSource, template;
-    console.log("updateView", data);
+    cs.debug("updateView", data);
     reposSource = $(this.repoTemplateEl).html();
     template = Handlebars.compile(reposSource);
     html = template(data);
@@ -267,7 +273,7 @@ App = (function() {
 
   App.prototype.flashMessage = function(msg) {
     var $el;
-    console.log(msg);
+    cs.debug(msg);
     $el = $("" + this.messageEl + " p");
     $el.html(msg);
     return $("body").addClass('message');
