@@ -208,7 +208,7 @@ class Github extends EventEmitter
       for repo, i in res.body
         index = self.findRepoIndex(repo.id)
         if index != null and index != undefined
-          repo = self.setBranch(repo.id)
+          repo = self.updateRepo(repo, index)
         else
           repo = self.addRepo(repo)
           repo = self.setBranch(repo.id)

@@ -284,7 +284,7 @@ Github = (function(_super) {
           repo = _ref[i];
           index = self.findRepoIndex(repo.id);
           if (index !== null && index !== void 0) {
-            repo = self.setBranch(repo.id);
+            repo = self.updateRepo(repo, index);
           } else {
             repo = self.addRepo(repo);
             repo = self.setBranch(repo.id);
