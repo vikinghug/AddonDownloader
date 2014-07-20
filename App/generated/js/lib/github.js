@@ -1,15 +1,19 @@
-var $, Data, EventEmitter, Github, WatchJS, appData, callWatchers, client, exec, fs, ghdownload, github, path, unwatch, watch,
+var EventEmitter, Github, WatchJS, appData, callWatchers, client, db, exec, fs, getKey, ghdownload, github, keys, path, request, unwatch, watch, _,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __slice = [].slice;
 
-$ = require('jquery');
+db = window.localStorage;
+
+_ = require('underscore');
 
 path = require('path');
 
 fs = require('fs.extra');
 
 exec = require('exec');
+
+request = require('superagent');
 
 github = require('octonode');
 
@@ -25,22 +29,22 @@ callWatchers = WatchJS.callWatchers;
 
 EventEmitter = require('events').EventEmitter;
 
-Data = require('./data');
-
 appData = process.env.APPDATA != null ? process.env.APPDATA : path.join(process.env.HOME, ".downloads");
 
-client = github.client("b88ebd287229cba593058175b38b059b13af6034");
+keys = ["894b9db89f78b7142263966c69cabf63cec31a19", "96234b48504bcb43a1d0a9e11cd7e596b45f4e54", "16cd039c3347e9689bf2e7d3eccdcfb627bec2fc", "3fe23a32720c1d08a38dc488c3e5128ea809fdaa"];
+
+getKey = function() {
+  return keys[Math.floor(Math.random() * keys.length + 1)];
+};
+
+client = github.client(getKey());
 
 Github = (function(_super) {
   __extends(Github, _super);
 
-  Github.prototype.blacklist = ["AddonDownloader", "vikinghug.com", "VikingActionBarSet", "VikingDocs", "VikingQuestTrackerSet"];
+  Github.prototype.blacklist = ["AddonDownloader", "vikinghug.com", "VikingActionBarSet", "VikingDocs", "VikingQuestTrackerSet", "VikingMedic"];
 
-  Github.prototype.addonsFolder = path.join(appData, "NCSOFT", "WildStar", "addons");
-
-  Github.prototype.addonsFolderSet = false;
-
-  Github.prototype.repos = [];
+  Github.prototype.whitelist = ["VikingActionBarFrame", "VikingActionBarShortcut", "VikingBuddies", "VikingClassResources", "VikingContextMenuPlayer", "VikingGroupFrame", "VikingHealthShieldBar", "Vikinghug", "VikingInventory", "VikingLibrary", "VikingMiniMap", "VikingNameplates", "VikingSettings", "VikingSprintMeter", "VikingTooltips", "VikingTradeskills", "VikingUnitFrames", "VikingXPBar"];
 
   Github.prototype.queue = [];
 
@@ -55,13 +59,20 @@ Github = (function(_super) {
     return;
   }
 
+  Github.prototype.init = function() {
+    if (db.addonsFolderSet === "false") {
+      console.log("NOPE");
+      return this.updateAddonsFolder(path.join(appData, "NCSOFT", "WildStar", "addons"));
+    }
+  };
+
   Github.prototype.setRepos = function(repos) {
-    return this.repos = repos;
+    return db.repos = repos;
   };
 
   Github.prototype.setAddonsFolder = function(dest) {
-    this.addonsFolderSet = true;
-    return this.addonsFolder = dest;
+    db.addonsFolderSet = true;
+    return db.addonsFolder = dest;
   };
 
   Github.prototype.updateAddonsFolder = function(dest) {
@@ -86,41 +97,48 @@ Github = (function(_super) {
       return _results;
     } catch (_error) {
       err = _error;
-      return self.emit("MESSAGE:ADD", err.message);
+      return this.emit("MESSAGE:ADD", err.message);
     }
   };
 
   Github.prototype.downloadRepos = function() {
-    var i, name, repo, url, _i, _len, _ref, _results;
-    if (!this.addonsFolderSet) {
-      this.updateAddonsFolder(this.addonsFolder);
+    var err, i, id, name, repo, _i, _len, _ref, _results;
+    if (!db.addonsFolderSet) {
+      this.updateAddonsFolder(db.addonsFolder);
       return this.addToQueue(this.downloadRepos);
     } else {
       try {
-        _ref = this.repos;
+        _ref = JSON.parse(db.repos);
         _results = [];
         for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
           repo = _ref[i];
-          url = repo.git_url;
+          id = repo.id;
           name = repo.name;
-          _results.push(this.downloadRepo(name, url));
+          _results.push(this.downloadRepo(name, id));
         }
         return _results;
       } catch (_error) {
-        return self.emit("MESSAGE:ADD", err.message);
+        err = _error;
+        return this.emit("MESSAGE:ADD", err.message);
       }
     }
   };
 
-  Github.prototype.downloadRepo = function(name, url) {
-    var dest, self;
-    if (!this.addonsFolderSet) {
-      this.updateAddonsFolder(this.addonsFolder);
+  Github.prototype.downloadRepo = function(name, id) {
+    var currentBranch, dest, repo, self, url;
+    repo = this.findRepo(id);
+    console.log(repo);
+    currentBranch = repo.current_branch;
+    url = _.findWhere(repo.branches, {
+      name: currentBranch
+    }).download_url;
+    if (!db.addonsFolderSet) {
+      this.updateAddonsFolder(db.addonsFolder);
       return this.addToQueue(this.downloadRepo, name, url);
     } else {
       console.log("downloadRepo: ->");
-      console.log(this.addonsFolder, name);
-      dest = path.join(this.addonsFolder, name);
+      console.log(db.addonsFolder, name);
+      dest = path.join(db.addonsFolder, name);
       self = this;
       return fs.exists(dest, (function(_this) {
         return function(bool) {
@@ -156,99 +174,150 @@ Github = (function(_super) {
   };
 
   Github.prototype.findRepo = function(id) {
-    var err, i, repo, _i, _len, _ref;
+    var index, repos;
+    repos = JSON.parse(db.getItem("repos"));
+    index = this.findRepoIndex(id);
+    return repos[index];
+  };
+
+  Github.prototype.findRepoIndex = function(id) {
+    var err, i, repo, repos, _i, _len;
+    console.log("findRepoIndex", id);
     try {
-      if (this.repos.length === 0) {
+      repos = JSON.parse(db.getItem("repos"));
+      if (repos.length === 0) {
         return null;
       }
-      _ref = this.repos;
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        repo = _ref[i];
+      for (i = _i = 0, _len = repos.length; _i < _len; i = ++_i) {
+        repo = repos[i];
         if (repo.id === id) {
           return i;
-        } else {
-          return null;
         }
       }
+      return null;
     } catch (_error) {
       err = _error;
       return this.sendError(err);
     }
   };
 
+  Github.prototype.resetBranches = function(branch) {
+    var key, repos, value, _results;
+    repos = JSON.parse(db.getItem("repos"));
+    _results = [];
+    for (key in repos) {
+      value = repos[key];
+      _results.push(this.setBranch(value.id, branch));
+    }
+    return _results;
+  };
+
+  Github.prototype.setBranch = function(id, branch) {
+    var err, index, repos;
+    console.log("setBranch");
+    try {
+      repos = JSON.parse(db.getItem("repos"));
+      index = this.findRepoIndex(id);
+      console.log("index: ", index);
+      if (branch == null) {
+        branch = "master";
+      }
+      repos[index].current_branch = branch;
+      return this.updateRepo(repos[index], index);
+    } catch (_error) {
+      err = _error;
+      return this.sendError(err);
+    }
+  };
+
+  Github.prototype.addRepo = function(repo, branch) {
+    var err, repos;
+    console.log("addRepo");
+    try {
+      repos = JSON.parse(db.getItem("repos"));
+      this.setBranch(repo.id, branch);
+      repos.push(repo);
+      db.repos = JSON.stringify(repos);
+      return repo;
+    } catch (_error) {
+      err = _error;
+      return this.sendError(err);
+    }
+  };
+
+  Github.prototype.updateRepo = function(repo, index) {
+    var err, repos, _base;
+    console.log("updateRepo");
+    try {
+      repos = JSON.parse(db.getItem("repos"));
+      _.extend(repos[index], repo);
+      if ((_base = repos[index]).current_branch == null) {
+        _base.current_branch = "master";
+      }
+      console.log("### current_branch: ", repos[index].current_branch);
+      repos[index].branches = this.updateBranches(repos[index].branches, repos[index].current_branch);
+      db.repos = JSON.stringify(repos);
+      return repos[index];
+    } catch (_error) {
+      err = _error;
+      return this.sendError(err);
+    }
+  };
+
+  Github.prototype.updateBranches = function(branches, currentBranch) {
+    var key, value;
+    for (key in branches) {
+      value = branches[key];
+      value.current = value.name === currentBranch ? true : false;
+    }
+    return branches;
+  };
+
   Github.prototype.getRepos = function(owner) {
-    var org;
-    org = client.org(owner);
-    return org.repos((function(_this) {
-      return function(err, array, headers) {
-        var i, repo, _i, _len, _results;
-        if (err) {
-          _this.emit("MESSAGE:ADD", err.message);
-          return;
-        }
-        array = _this.filterForBlacklist(array);
-        try {
-          _results = [];
-          for (i = _i = 0, _len = array.length; _i < _len; i = ++_i) {
-            repo = array[i];
-            try {
-              _results.push(_this.initRepo(repo, i));
-            } catch (_error) {
-              err = _error;
-              _results.push(_this.sendError(err));
-            }
+    var self;
+    if (db.repos === void 0) {
+      db.setItem("repos", JSON.stringify([]));
+    }
+    self = this;
+    return request.get('http://api.vikinghug.com/repos').end((function(_this) {
+      return function(res) {
+        var i, index, repo, _i, _len, _ref, _results;
+        _ref = res.body;
+        _results = [];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          repo = _ref[i];
+          index = self.findRepoIndex(repo.id);
+          if (index !== null && index !== void 0) {
+            repo = self.updateRepo(repo, index);
+          } else {
+            repo = self.addRepo(repo);
           }
-          return _results;
-        } catch (_error) {
-          err = _error;
-          return self.emit("MESSAGE:ADD", err.message);
+          _results.push(self.emit("MODULE:UPDATE", repo));
         }
+        return _results;
       };
     })(this));
   };
 
   Github.prototype.sendError = function(err) {
-    return self.emit("MESSAGE:ADD", err.message);
+    return this.emit("MESSAGE:ADD", err.message);
   };
 
-  Github.prototype.initRepo = function(repo, i) {
-    var index, payload, self;
-    payload = {
-      id: repo.id,
-      owner: repo.owner.login,
-      name: repo.name,
-      git_url: repo.git_url,
-      html_url: repo.html_url,
-      ssh_url: repo.ssh_url,
-      branches: null
-    };
-    index = this.findRepo(repo.id);
-    if (index) {
-      this.repos[index] = payload;
-    } else {
-      this.repos.push(payload);
-    }
-    this.runCommand("branches", payload);
-    this.runCommand("info", payload);
+  Github.prototype.filterForWhitelist = function(array) {
+    var repos, self;
     self = this;
-    watch(payload, function(key, command, data) {
-      var branch, err, _i, _len;
-      switch (key) {
-        case "branches":
-          try {
-            for (i = _i = 0, _len = data.length; _i < _len; i = ++_i) {
-              branch = data[i];
-              branch.html_url = "" + this.html_url + "/tree/" + branch.name;
-              branch.download_url = "" + this.git_url + "\#" + branch.name;
-            }
-          } catch (_error) {
-            err = _error;
-            self.emit("MESSAGE:ADD", err.message);
-          }
+    return repos = array.filter(function(repo) {
+      var n;
+      n = 0;
+      self.blacklist.map((function(_this) {
+        return function(name) {
+          return n += repo.name === name;
+        };
+      })(this));
+      if (n > 0) {
+        return repo;
       }
-      return self.emit("MODULE:UPDATE", this);
     });
-    return this.emit("MODULE:UPDATE", payload);
   };
 
   Github.prototype.filterForBlacklist = function(array) {
@@ -266,16 +335,6 @@ Github = (function(_super) {
         return repo;
       }
     });
-  };
-
-  Github.prototype.runCommand = function(command, data) {
-    var repo;
-    repo = client.repo("" + data.owner + "/" + data.name);
-    return repo[command]((function(_this) {
-      return function(err, response, headers) {
-        return data[command] = response;
-      };
-    })(this));
   };
 
   return Github;

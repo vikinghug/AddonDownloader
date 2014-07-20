@@ -2,18 +2,24 @@
   "name": "downloader-builder",
   "version": "1.0.0",
   "dependencies": {
+    "del": "^0.1.1",
+    "gulp-browserify": "^0.5.0",
+    "gulp-jade": "^0.6.1",
+    "handlebars": "^2.0.0-alpha.4",
+    "jquery": "^2.1.1",
     "nedb": "^0.10.5",
+    "nodewebkit": "^0.8.6-3",
     "octonode": "^0.6.3",
-    "nodewebkit": "^0.8.6-3"
+    "run-sequence": "^0.3.6"
   },
   "scripts": {
-    "start": "node ./node_modules/nodewebkit/bin/nodewebkit ./app/"
+    "start": "coffee start.coffee"
   },
   "devDependencies": {
     "coffee-script": "^1.7.1",
     "coffeeify": "^0.6.0",
     "fs.extra": "^1.2.1",
-    "gulp": "^3.8.1",
+    "gulp": "^3.8.6",
     "gulp-clean": "^0.3.0",
     "gulp-coffee": "^1.4.3",
     "gulp-ejs": "^0.2.2",
@@ -21,6 +27,7 @@
     "gulp-rename": "^1.2.0",
     "gulp-stylus": "^0.1.0",
     "gulp-util": "^2.2.14",
+    "run-command": "^0.1.1",
     "stylus": "^0.42.3"
   }
 }

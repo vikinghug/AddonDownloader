@@ -1,0 +1,103 @@
+- name: Addondownloader
+  version: 0.0.1
+  keep: false
+
+- name: VikingActionBarFrame
+  version: 0.0.1
+  keep: true
+
+- name: VikingActionBarShortcut
+  version: 0.0.1
+  keep: true
+
+- name: VikingBuddies
+  version: 0.0.1
+  keep: true
+
+- name: VikingClassResources
+  version: 0.0.1
+  keep: true
+
+- name: VikingCli
+  version: 0.0.1
+  keep: false
+
+- name: VikingContextMenuPlayer
+  version: 0.0.1
+  keep: true
+
+- name: VikingDatachron
+  version: 0.0.1
+  keep: false
+
+- name: VikingDocs
+  version: 0.0.1
+  keep: false
+
+- name: VikingGroupFrame
+  version: 0.0.1
+  keep: true
+
+- name: VikingHealthShieldBar
+  version: 0.0.1
+  keep: true
+
+- name: Vikinghug
+  version: 0.0.1
+  keep: true
+
+- name: VikingInventory
+  version: 0.0.1
+  keep: true
+
+- name: VikingLibrary
+  version: 0.0.1
+  keep: true
+
+- name: VikingMedic
+  version: 0.0.1
+  keep: false
+
+- name: VikingMiniMap
+  version: 0.0.1
+  keep: true
+
+- name: VikingNameplates
+  version: 0.0.1
+  keep: true
+
+- name: VikingQuestTracker
+  version: 0.0.1
+  keep: false
+
+- name: VikingRaidFrame
+  version: 0.0.1
+  keep: false
+
+- name: VikingSet
+  version: 0.0.1
+  keep: false
+
+- name: VikingSettings
+  version: 0.0.1
+  keep: true
+
+- name: VikingSprintMeter
+  version: 0.0.1
+  keep: true
+
+- name: VikingTooltips
+  version: 0.0.1
+  keep: true
+
+- name: VikingTradeskills
+  version: 0.0.1
+  keep: true
+
+- name: VikingUnitFrames
+  version: 0.2.0
+  keep: true
+
+- name: VikingXPBar
+  version: 0.0.1
+  keep: true

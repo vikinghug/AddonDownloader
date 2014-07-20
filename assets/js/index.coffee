@@ -1,13 +1,15 @@
-'use strict'
+db = window.localStorage
 
-
+_            = require('underscore')
 $            = require('jquery')
+domino       = require('domino')
+Zepto        = require('zepto-node')
+z            = Zepto(window)
 Handlebars   = require('handlebars')
 fs           = require('fs')
 events       = require('events')
 em           = new events.EventEmitter()
 gh           = require('./lib/github')
-Data         = require('./lib/data')
 
 class App
 
@@ -16,6 +18,7 @@ class App
   configTooltipEl    : "#config-tooltip"
   downloadAllBtnEl   : "#download-all"
   downloadBtnClassEl : ".download"
+  setBranchClassEl   : ".set-branch"
   messageEl          : "#message"
   reposEl            : "#repos"
   repoTemplateEl     : "#repo-template"
@@ -23,8 +26,10 @@ class App
   secret             : 0
 
   constructor: ->
+    console.log db
     @initView()
     @createEvents()
+    gh.init()
     gh.getRepos("vikinghug")
 
 
@@ -32,6 +37,7 @@ class App
     package_info = JSON.parse(fs.readFileSync('package.json', 'utf8'))
     win = window.gui.Window.get()
     win.title = "#{package_info.name} - v#{package_info.version}"
+    @setAddonsTooltip(db.addonsFolder) if db.addonsFolder?
 
 
   checkDevCommand: ->
@@ -59,26 +65,40 @@ class App
     secretTimer = null
 
     $("body").on "keyup", (e) ->
+      KEY_ESCAPE = 27
+      KEY_F8     = 119
+      return self.removeMessage() if e.keyCode == KEY_ESCAPE
       if not self.timer
         self.timer = true
         self.secretTimer = setTimeout(( => self.checkDevCommand() ), 3000)
       # 119 == F8
-      self.secret++ if e.ctrlKey && e.keyCode == 119
+      self.secret++ if e.ctrlKey && e.keyCode == KEY_F8
       if self.secret >= 2
         clearTimeout(self.secretTimer)
         self.checkDevCommand()
 
-    $(@downloadAllBtnEl).on 'click', (e) =>
+    $("body").on 'click', @downloadAllBtnEl, (e) =>
       try
         gh.downloadRepos()
       catch err
-        console.log err
+        self.flashMessage(err.message)
+
+
+    $("body").on 'click', '#reset-all', (e) =>
+      try
+        gh.resetBranches("master")
+        $.each $('.module'), (i, el) =>
+          self.updateBranchMenu($(el), "master")
+      catch err
+        self.flashMessage(err.message)
+
 
 
     $("body").on 'click', "a[href]", (e) ->
       e.preventDefault()
       href = e.target.getAttribute("href")
       window.gui.Shell.openExternal(href)
+
     $("body").on 'click', "#config-button", (e) ->
       e.preventDefault()
       self.setAddonsFolder(gh.addonsFolder)
@@ -89,15 +109,54 @@ class App
 
     $("body").on 'click', @downloadBtnClassEl, (e) =>
       $el = $(e.target).parents('.module')
-      url = $(e.target).data("url")
-      url ?= $el.data("repo-url")
+      id   = $el.data("repo-id")
       name = $el.data("repo-name")
-      gh.downloadRepo(name, url)
+      gh.downloadRepo(name, id)
+
+    $("body").on 'click', @setBranchClassEl, (e) =>
+      $el    = $(e.target).parents('.module')
+      url    = $(e.target).data("url") or $el.data("repo-url")
+      id     = $el.data("repo-id")
+      name   = $el.data("repo-name")
+      branch = $(e.target).text()
+      gh.setBranch(id, branch)
+      @updateBranchMenu($el, branch)
+
+    $("body").on 'mouseenter', '.branches', (e) =>
+      viewportHeight = $(window).height()
+      mousePosition  = e.clientY
+
+      $el     = $(e.currentTarget)
+      $menuEl = $el.find('.menu')
+      if mousePosition > viewportHeight / 2
+        $menuEl.css
+          "top": -$menuEl.height()
+        $menuEl.removeClass("top")
+        $menuEl.addClass("bottom")
+      else
+        $menuEl.css
+          "top": 50
+        $menuEl.removeClass("bottom")
+        $menuEl.addClass("top")
+
+      console.log $menuEl
 
     $(@messageEl).on 'click', '.close', (e) =>
-      self.removeMessage()
+      @removeMessage()
+
+
+  updateBranchMenu: ($module, branch) ->
+    $module.find('button.dropdown').text(branch)
+    $.each $module.find('.menu .set-branch'), (i, el) ->
+      if $(el).text() == branch
+        $(el).addClass('checked')
+      else
+        $(el).removeClass('checked')
+
+
 
   updateView: (data) ->
+    console.log "updateView"
     reposSource = $(@repoTemplateEl).html()
     template    = Handlebars.compile(reposSource)
     html        = template(data)
@@ -143,5 +202,6 @@ class App
     $(@fileDialogEl).click()
 
   setAddonsTooltip: (dest) -> $(@configTooltipEl).html(dest)
+
 
 module.exports = window.App = new App()

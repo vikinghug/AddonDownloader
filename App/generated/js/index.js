@@ -1,7 +1,16 @@
-'use strict';
-var $, App, Data, Handlebars, em, events, fs, gh;
+var $, App, Handlebars, Zepto, db, domino, em, events, fs, gh, z, _;
+
+db = window.localStorage;
+
+_ = require('underscore');
 
 $ = require('jquery');
+
+domino = require('domino');
+
+Zepto = require('zepto-node');
+
+z = Zepto(window);
 
 Handlebars = require('handlebars');
 
@@ -12,8 +21,6 @@ events = require('events');
 em = new events.EventEmitter();
 
 gh = require('./lib/github');
-
-Data = require('./lib/data');
 
 App = (function() {
   App.prototype.configBtnEl = "#config-button";
@@ -26,6 +33,8 @@ App = (function() {
 
   App.prototype.downloadBtnClassEl = ".download";
 
+  App.prototype.setBranchClassEl = ".set-branch";
+
   App.prototype.messageEl = "#message";
 
   App.prototype.reposEl = "#repos";
@@ -37,8 +46,10 @@ App = (function() {
   App.prototype.secret = 0;
 
   function App() {
+    console.log(db);
     this.initView();
     this.createEvents();
+    gh.init();
     gh.getRepos("vikinghug");
   }
 
@@ -46,7 +57,10 @@ App = (function() {
     var package_info, win;
     package_info = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     win = window.gui.Window.get();
-    return win.title = "" + package_info.name + " - v" + package_info.version;
+    win.title = "" + package_info.name + " - v" + package_info.version;
+    if (db.addonsFolder != null) {
+      return this.setAddonsTooltip(db.addonsFolder);
+    }
   };
 
   App.prototype.checkDevCommand = function() {
@@ -94,6 +108,12 @@ App = (function() {
     self = this;
     secretTimer = null;
     $("body").on("keyup", function(e) {
+      var KEY_ESCAPE, KEY_F8;
+      KEY_ESCAPE = 27;
+      KEY_F8 = 119;
+      if (e.keyCode === KEY_ESCAPE) {
+        return self.removeMessage();
+      }
       if (!self.timer) {
         self.timer = true;
         self.secretTimer = setTimeout(((function(_this) {
@@ -102,7 +122,7 @@ App = (function() {
           };
         })(this)), 3000);
       }
-      if (e.ctrlKey && e.keyCode === 119) {
+      if (e.ctrlKey && e.keyCode === KEY_F8) {
         self.secret++;
       }
       if (self.secret >= 2) {
@@ -110,14 +130,28 @@ App = (function() {
         return self.checkDevCommand();
       }
     });
-    $(this.downloadAllBtnEl).on('click', (function(_this) {
+    $("body").on('click', this.downloadAllBtnEl, (function(_this) {
       return function(e) {
         var err;
         try {
           return gh.downloadRepos();
         } catch (_error) {
           err = _error;
-          return console.log(err);
+          return self.flashMessage(err.message);
+        }
+      };
+    })(this));
+    $("body").on('click', '#reset-all', (function(_this) {
+      return function(e) {
+        var err;
+        try {
+          gh.resetBranches("master");
+          return $.each($('.module'), function(i, el) {
+            return self.updateBranchMenu($(el), "master");
+          });
+        } catch (_error) {
+          err = _error;
+          return self.flashMessage(err.message);
         }
       };
     })(this));
@@ -137,25 +171,69 @@ App = (function() {
     });
     $("body").on('click', this.downloadBtnClassEl, (function(_this) {
       return function(e) {
-        var $el, name, url;
+        var $el, id, name;
         $el = $(e.target).parents('.module');
-        url = $(e.target).data("url");
-        if (url == null) {
-          url = $el.data("repo-url");
-        }
+        id = $el.data("repo-id");
         name = $el.data("repo-name");
-        return gh.downloadRepo(name, url);
+        return gh.downloadRepo(name, id);
+      };
+    })(this));
+    $("body").on('click', this.setBranchClassEl, (function(_this) {
+      return function(e) {
+        var $el, branch, id, name, url;
+        $el = $(e.target).parents('.module');
+        url = $(e.target).data("url") || $el.data("repo-url");
+        id = $el.data("repo-id");
+        name = $el.data("repo-name");
+        branch = $(e.target).text();
+        gh.setBranch(id, branch);
+        return _this.updateBranchMenu($el, branch);
+      };
+    })(this));
+    $("body").on('mouseenter', '.branches', (function(_this) {
+      return function(e) {
+        var $el, $menuEl, mousePosition, viewportHeight;
+        viewportHeight = $(window).height();
+        mousePosition = e.clientY;
+        $el = $(e.currentTarget);
+        $menuEl = $el.find('.menu');
+        if (mousePosition > viewportHeight / 2) {
+          $menuEl.css({
+            "top": -$menuEl.height()
+          });
+          $menuEl.removeClass("top");
+          $menuEl.addClass("bottom");
+        } else {
+          $menuEl.css({
+            "top": 50
+          });
+          $menuEl.removeClass("bottom");
+          $menuEl.addClass("top");
+        }
+        return console.log($menuEl);
       };
     })(this));
     return $(this.messageEl).on('click', '.close', (function(_this) {
       return function(e) {
-        return self.removeMessage();
+        return _this.removeMessage();
       };
     })(this));
   };
 
+  App.prototype.updateBranchMenu = function($module, branch) {
+    $module.find('button.dropdown').text(branch);
+    return $.each($module.find('.menu .set-branch'), function(i, el) {
+      if ($(el).text() === branch) {
+        return $(el).addClass('checked');
+      } else {
+        return $(el).removeClass('checked');
+      }
+    });
+  };
+
   App.prototype.updateView = function(data) {
     var $el, html, reposSource, template;
+    console.log("updateView");
     reposSource = $(this.repoTemplateEl).html();
     template = Handlebars.compile(reposSource);
     html = template(data);

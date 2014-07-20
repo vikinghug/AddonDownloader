@@ -1,14 +1,16 @@
 // Gulpfile.js
 // Require the needed packages
-var gulp       = require('gulp'),
-    gutil      = require('gulp-util'),
-    clean      = require('gulp-clean'),
-    coffee     = require('gulp-coffee'),
-    stylus     = require('gulp-stylus'),
-    rename     = require('gulp-rename'),
-    ejs        = require("gulp-ejs"),
-    path       = require("path"),
-    fs         = require('fs.extra');
+var gulp        = require('gulp'),
+    gutil       = require('gulp-util'),
+    clean       = require('gulp-clean'),
+    coffee      = require('gulp-coffee'),
+    stylus      = require('gulp-stylus'),
+    rename      = require('gulp-rename'),
+    ejs         = require("gulp-ejs"),
+    path        = require("path"),
+    fs          = require('fs.extra'),
+    del         = require('del'),
+    runSequence = require('run-sequence');
 
 var baseAppPath = path.join(__dirname,  'assets'),
     baseStaticPath = path.join(__dirname, 'App', 'generated'),
@@ -16,12 +18,13 @@ var baseAppPath = path.join(__dirname,  'assets'),
     baseCssPath = path.join(baseAppPath, 'css');
 
 var paths = {
-  cssInput: path.join(baseCssPath, 'main.styl'),
-  cssOutput: path.join(baseStaticPath, 'css'),
-  coffeeInput: path.join(baseJsPath, '**', '*.coffee'),
-  coffeeOutput: path.join(baseStaticPath, 'js'),
-  ejsPath:  [path.join(baseAppPath, '**', '*.ejs')],
-  assetsBasePath: baseAppPath,
+  cleanPath      : path.join(baseStaticPath, '**', '*'),
+  cssInput       : path.join(baseCssPath, 'main.styl'),
+  cssOutput      : path.join(baseStaticPath, 'css'),
+  coffeeInput    : path.join(baseJsPath, '**', '*.coffee'),
+  coffeeOutput   : path.join(baseStaticPath, 'js'),
+  ejsPath        : [path.join(baseAppPath, '**', '*.ejs')],
+  assetsBasePath : baseAppPath,
   assetsPaths: [
     path.join(baseAppPath, 'img', '**', '*'),
     path.join(baseAppPath, 'fonts', '**', '*'),
@@ -68,17 +71,12 @@ gulp.task('test', function() {
 
 // Get and render all .styl files recursively
 gulp.task('stylus', function () {
-  gulp.src(paths.cssInput)
+  return gulp.src(paths.cssInput)
     .pipe(stylus()
       .on('error', gutil.log)
       .on('error', gutil.beep))
     .pipe(gulp.dest(paths.cssOutput));
 
-  gulp.src(path.join(baseCssPath, "old.styl"))
-    .pipe(stylus()
-      .on('error', gutil.log)
-      .on('error', gutil.beep))
-    .pipe(gulp.dest(paths.cssOutput));
 });
 
 
@@ -87,7 +85,7 @@ gulp.task('stylus', function () {
 //
 
 gulp.task('coffee', function() {
-  gulp.src(paths.coffeeInput)
+  return gulp.src(paths.coffeeInput)
     .pipe(coffee({bare: true})
       .on('error', gutil.log)
       .on('error', gutil.beep))
@@ -100,7 +98,7 @@ gulp.task('coffee', function() {
 //
 
 gulp.task('ejs', function() {
-  gulp.src(paths.ejsPath)
+  return gulp.src(paths.ejsPath)
     .pipe(ejs()
       .on('error', gutil.log)
       .on('error', gutil.beep))
@@ -113,7 +111,7 @@ gulp.task('ejs', function() {
 //
 
 gulp.task('assets', function() {
-  gulp.src(paths.assetsPaths, {base: paths.assetsBasePath})
+  return gulp.src(paths.assetsPaths, {base: paths.assetsBasePath})
     .pipe(gulp.dest(paths.assetsOutput)
       .on('error', gutil.log)
       .on('error', gutil.beep));
@@ -125,10 +123,16 @@ gulp.task('assets', function() {
 //
 
 gulp.task('clean', function() {
-  gulp.src(path.join(baseStaticPath, '**', '*'), {read: false})
-    .pipe(clean()
-      .on('error', gutil.log)
-      .on('error', gutil.beep));
+  return del(paths.cleanPath, { sync: true });
+});
+
+
+//
+// Watch pre-tasks
+//
+
+gulp.task('watch-pre-tasks', function(callback) {
+  runSequence('clean', ['coffee', 'stylus', 'assets', 'ejs', 'jade'], callback);
 });
 
 

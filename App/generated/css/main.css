@@ -367,7 +367,6 @@ ul.no-bullet,
 }
 [class*="icon-"]:before,
 #download-all:before,
-.module .branches button.dropdown:before,
 .module .branches button.dropdown:after,
 .module .download:before,
 #message .close:after {
@@ -434,6 +433,7 @@ body {
   background-color: #201e2d;
   font-size: 16px;
   line-height: 1.2;
+  overflow-x: hidden;
 }
 * {
   cursor: default;
@@ -506,6 +506,8 @@ header .toolbar {
 .module {
   box-shadow: 0 1px #28253a;
   padding: 15px;
+  line-height: 19px;
+  position: relative;
 }
 .module.done .icon-diamond {
   color: #3cb878;
@@ -522,32 +524,25 @@ header .toolbar {
 }
 .module .branches {
   display: inline-block;
-  position: relative;
 }
 .module .branches:hover button.dropdown {
   background: #bcb7da;
   color: #28253a;
 }
-.module .branches:hover ul {
+.module .branches:hover ul.menu {
   color: #645f7e;
-  display: block;
+  opacity: 0.98;
+  left: 0;
 }
 .module .branches button.dropdown {
-  box-shadow: inset 0 0 0 1px rgba(100,95,126,0.8);
-  font-size: 0.8em;
+  font-size: 0.7em;
   height: 22px;
-  margin-right: 10px;
-  line-height: 1em;
+  margin-right: 5px;
+  line-height: 1.2em;
   overflow: visible;
   position: relative;
   cursor: default;
-  z-index: 1;
-}
-.module .branches button.dropdown:before {
-  content: "\e480";
-  color: inherit;
-  margin: 0 0.5em 0 0;
-  padding: 0;
+  z-index: 3;
 }
 .module .branches button.dropdown:after {
   content: "\e62a";
@@ -558,29 +553,79 @@ header .toolbar {
 .module .branches ul {
   background: #28253a;
   position: absolute;
-  display: none;
   text-align: left;
   top: 22px;
 }
 .module .branches ul li {
   box-shadow: 0 1px #201e2d;
-  padding: 15px;
+  padding: 0 15px;
   white-space: nowrap;
   text-align: left;
   position: relative;
 }
+.module .branches ul li a {
+  cursor: pointer;
+  display: block;
+  padding: 15px 0;
+}
+.module .branches ul li a:hover {
+  color: #ffd161;
+}
+.module .branches ul li a:before {
+  border-radius: 1000px;
+  box-shadow: 0 0 0 1px #645f7e;
+  display: inline-block;
+  content: '';
+  width: 12px;
+  height: 12px;
+  margin-right: 10px;
+  line-height: 1em;
+  overflow: visible;
+  position: relative;
+  cursor: default;
+  z-index: 100;
+}
+.module .branches ul li a.checked:before {
+  box-shadow: 0 0 0 1px #ffd161;
+  background: #ffd161;
+}
 .module .branches .menu {
+  -webkit-transition: 0.4s opacity ease;
+  -moz-transition: 0.4s opacity ease;
+  transition: 0.4s opacity ease;
   position: absolute;
-  z-index: 2;
+  z-index: 300;
+  right: -1000px;
+  opacity: 0;
+}
+.module .branches .menu.bottom:after {
+  content: '';
+  display: block;
+  height: 50px;
+  left: 0;
+  right: 0;
+  bottom: -50px;
+  position: absolute;
+}
+.module .branches .menu.top:before {
+  content: '';
+  display: block;
+  height: 50px;
+  left: 0;
+  right: 0;
+  top: -50px;
+  position: absolute;
 }
 .module .branches .menu a {
   padding-right: 60px;
 }
 .module .branches .menu .download {
-  font-size: 1.2em;
+  font-size: 0;
+  padding-left: 0;
   padding-right: 0;
   margin-right: 0px;
   position: absolute;
+  top: 0;
   right: 15px;
 }
 .module .branches .menu .download:after {
@@ -604,6 +649,14 @@ header .toolbar {
   color: inherit;
   margin: 0 0.5em 0 0;
   padding: 0;
+}
+.module .download:before {
+  font-size: 17px;
+  margin: 0;
+  line-height: 0;
+  height: 0;
+  position: relative;
+  top: 2px;
 }
 .module .download span {
   display: none;

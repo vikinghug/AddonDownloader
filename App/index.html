@@ -17,28 +17,27 @@
 
     <ul id="repos" class="modules"></ul>
       <script id="repo-template" type="text/x-handlebars-template">
-        <li class="module" data-repo-id="{{id}}" data-repo-url="{{ssh_url}}" data-repo-name="{{name}}">
-          <div class="branches">
-            <button class="dropdown">{{branches.length}}</button>
-
-            <ul class="menu">
-              {{#branches}}
-                <li>
-                  <a href="{{this.html_url}}" target="_blank">{{this.name}}</a>
-                  <button class="download" data-url="{{this.download_url}}"><span>Download</span></button>
-                </li>
-              {{/branches}}
-            </ul>
-
-          </div>
-
+        <li class="module" data-repo-id="{{id}}" data-repo-url="{{ssh_url}}" data-repo-name="{{name}}" data-current-branch="{{current_branch}}">
 
           <a href="{{this.html_url}}" target="_blank">{{name}}</a>
+
 
           <span class="right">
             <span class="updates"></span>
             <i class="icon-diamond"></i>
-            <button class="download">Download</button>
+            <div class="branches">
+              <button class="dropdown">{{this.current_branch}}</button>
+
+              <ul class="menu">
+                {{#branches}}
+                  <li>
+                    <a class="set-branch {{#if this.current}}checked{{/if}}" id="{{../name}}-{{this.name}}" data-branch-url="{{this.download_url}}">{{this.name}}</a>
+                  </li>
+                {{/branches}}
+              </ul>
+
+            </div>
+            <button class="download"></button>
           </span>
 
         </li>
@@ -47,6 +46,7 @@
 
     <footer>
       <button id="download-all">Download All</button>
+      <button id="reset-all">Reset All Branches</button>
     </footer>
 
     <div id="message">
@@ -56,6 +56,9 @@
 
     <script>
       window.gui = require('nw.gui');
+      window.localStorage = localStorage;
+      global.Element = Element;
+      global.document = window.document;
       gh = require('./generated/js/index');
     </script>
 
