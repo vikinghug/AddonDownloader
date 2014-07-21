@@ -11,5 +11,8 @@ AddonDownloader
 -- Open PowerShell as Administrator
 -- run `Set-ExecutionPolicy Unrestricted`
 5. cd into the AddonDownloader repository
-6. run `.\builder.ps1`
-
+6. run `mkdir releases`
+7. run `.\builder.ps1`
+8. move the `app.exe` file in the `releases/` folder into the node webkit folder on your desktop
+9. run the app
+10. 
