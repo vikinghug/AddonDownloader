@@ -39,6 +39,7 @@ class Github extends EventEmitter
     'VikingActionBarSet'
     'VikingDocs'
     'VikingQuestTrackerSet'
+    'VikingQuestTracker'
     'VikingMedic'
   ]
 
